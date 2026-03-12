@@ -170,38 +170,61 @@
   </div>
 </div>
 
-<!-- ── THINK MODAL (Inbox dump) ── -->
+<!-- ── THINK MODAL ── -->
 <div class="think-overlay" id="think-overlay">
   <div class="think-panel">
     <div class="cap-hdr">
       <h2>Think</h2>
-      <p>Dump raw thinking. Don't worry about what it is yet.</p>
+      <p id="think-hdr-sub">Dump raw thinking. Don't filter.</p>
       <button class="cap-close" onclick="closeThink()">×</button>
     </div>
-    <div class="cap-scroll">
-      <div class="cap-section">
-        <label>Title (optional)</label>
-        <input type="text" class="cap-input" id="think-title" placeholder="Give it a rough name...">
-      </div>
-      <div class="cap-section">
-        <label>Raw thinking</label>
-        <textarea class="cap-input" id="think-dump" placeholder="Just dump it. Questions, observations, half-formed ideas. Don't filter." style="min-height:140px"></textarea>
-      </div>
-      <div class="cap-section">
-        <label>Where did this come from?</label>
-        <div class="cap-chips">
-          <button class="cap-chip think-source-chip active" onclick="pickThinkSource(this)">Own thinking</button>
-          <button class="cap-chip think-source-chip" onclick="pickThinkSource(this)">Conversation</button>
-          <button class="cap-chip think-source-chip" onclick="pickThinkSource(this)">Podcast</button>
-          <button class="cap-chip think-source-chip" onclick="pickThinkSource(this)">Reading</button>
-          <button class="cap-chip think-source-chip" onclick="pickThinkSource(this)">Observation</button>
+
+    <!-- Phase 1: Dump -->
+    <div id="think-dump-phase" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+      <div class="cap-scroll">
+        <div class="cap-section">
+          <label>Title (optional)</label>
+          <input type="text" class="cap-input" id="think-title" placeholder="Give it a rough name...">
+        </div>
+        <div class="cap-section">
+          <label>Raw thinking</label>
+          <textarea class="cap-input" id="think-dump" placeholder="Just dump it. Questions, observations, half-formed ideas. Don't filter." style="min-height:160px"></textarea>
+        </div>
+        <div class="cap-section">
+          <label>Where did this come from?</label>
+          <div class="cap-chips">
+            <button class="cap-chip think-source-chip selected" onclick="pickThinkSource(this)">Own thinking</button>
+            <button class="cap-chip think-source-chip" onclick="pickThinkSource(this)">Conversation</button>
+            <button class="cap-chip think-source-chip" onclick="pickThinkSource(this)">Podcast</button>
+            <button class="cap-chip think-source-chip" onclick="pickThinkSource(this)">Reading</button>
+            <button class="cap-chip think-source-chip" onclick="pickThinkSource(this)">Observation</button>
+          </div>
         </div>
       </div>
+      <div class="cap-actions">
+        <button class="cap-btn" onclick="closeThink()">Cancel</button>
+        <button class="cap-btn" onclick="saveThink()">Save only</button>
+        <button class="cap-btn primary" onclick="startThinkSpar()">Spar with Claude →</button>
+      </div>
     </div>
-    <div class="cap-actions">
-      <button class="cap-btn" onclick="closeThink()">Cancel</button>
-      <button class="cap-btn primary" onclick="saveThink()">Add to Inbox</button>
+
+    <!-- Phase 2: Spar -->
+    <div id="think-spar-phase" style="display:none;flex:1;flex-direction:column;overflow:hidden">
+      <div class="cap-scroll" id="think-conv-scroll">
+        <div class="conv-thread" id="think-conv-thread"></div>
+      </div>
+      <div style="padding:0 28px;border-top:1px solid var(--rule)">
+        <div class="conv-input-wrap">
+          <textarea class="conv-input" id="think-conv-input" placeholder="Reply..." rows="2"></textarea>
+          <button class="conv-send-btn" id="think-send-btn" onclick="sendThinkSpar()">Send</button>
+        </div>
+      </div>
+      <div class="cap-actions">
+        <button class="cap-btn" onclick="closeThink()">Discard</button>
+        <button class="cap-btn primary" onclick="saveThinkWithConv()">Save to Inbox</button>
+      </div>
     </div>
+
   </div>
 </div>
 

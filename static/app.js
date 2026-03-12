@@ -808,11 +808,18 @@ function removeImage() {
 }
 
 // ─── THINK MODAL ───
+let thinkConversation = [];
+
 function openThink() {
   think = { source:"Own thinking" };
+  thinkConversation = [];
   document.getElementById("think-title").value = "";
   document.getElementById("think-dump").value  = "";
-  document.querySelectorAll(".think-source-chip").forEach(c => c.classList.toggle("selected", c.textContent === "Own thinking"));
+  document.getElementById("think-conv-thread").innerHTML = "";
+  document.getElementById("think-hdr-sub").textContent = "Dump raw thinking. Don't filter.";
+  document.querySelectorAll(".think-source-chip").forEach(c => c.classList.toggle("selected", c.textContent.trim() === "Own thinking"));
+  document.getElementById("think-dump-phase").style.display = "flex";
+  document.getElementById("think-spar-phase").style.display = "none";
   document.getElementById("think-overlay").classList.add("open");
 }
 
@@ -823,14 +830,84 @@ function closeThink() {
 function pickThinkSource(el) {
   document.querySelectorAll(".think-source-chip").forEach(c => c.classList.remove("selected"));
   el.classList.add("selected");
-  think.source = el.textContent;
+  think.source = el.textContent.trim();
+}
+
+async function startThinkSpar() {
+  const raw = document.getElementById("think-dump").value.trim();
+  if (!raw) { showToast("Add some thinking first"); return; }
+
+  // Switch to spar phase
+  document.getElementById("think-dump-phase").style.display = "none";
+  document.getElementById("think-spar-phase").style.display = "flex";
+  document.getElementById("think-hdr-sub").textContent = "Sparring with Claude";
+
+  // Send raw dump as first message
+  thinkConversation = [{ role:"user", content: raw }];
+  renderThinkConv();
+  await callThinkSpar();
+}
+
+async function sendThinkSpar() {
+  const inputEl = document.getElementById("think-conv-input");
+  const msg = (inputEl.value||"").trim();
+  if (!msg) return;
+  inputEl.value = "";
+  thinkConversation.push({ role:"user", content: msg });
+  renderThinkConv();
+  await callThinkSpar();
+}
+
+async function callThinkSpar() {
+  const btn = document.getElementById("think-send-btn");
+  if (btn) { btn.textContent = "..."; btn.disabled = true; }
+
+  try {
+    const res = await fetch("/api/think-chat", {
+      method: "POST",
+      headers: { "Content-Type":"application/json" },
+      body: JSON.stringify({ conversation: thinkConversation, beliefs: items })
+    });
+    const data = await res.json();
+    const reply = data.reply || "Something went wrong — try again.";
+    thinkConversation.push({ role:"assistant", content: reply });
+    renderThinkConv();
+  } catch(e) {
+    showToast("Error reaching Claude — check connection");
+    console.error(e);
+  } finally {
+    if (btn) { btn.textContent = "Send"; btn.disabled = false; }
+  }
+}
+
+function renderThinkConv() {
+  const thread = document.getElementById("think-conv-thread");
+  thread.innerHTML = thinkConversation.map(msg =>
+    `<div class="conv-msg ${msg.role}">
+      <div class="conv-msg-role">${msg.role === "user" ? "You" : "Claude"}</div>
+      <div class="conv-msg-text">${escHtml(msg.content)}</div>
+    </div>`
+  ).join("");
+  // Scroll to bottom
+  const scroll = document.getElementById("think-conv-scroll");
+  if (scroll) scroll.scrollTop = scroll.scrollHeight;
 }
 
 async function saveThink() {
   const title = document.getElementById("think-title").value.trim();
   const raw   = document.getElementById("think-dump").value.trim();
   if (!raw) { showToast("Add some thinking first"); return; }
+  await _saveThinkItem(title, raw, []);
+}
 
+async function saveThinkWithConv() {
+  const title = document.getElementById("think-title").value.trim();
+  const raw   = document.getElementById("think-dump").value.trim() || (thinkConversation[0]||{}).content || "";
+  await _saveThinkItem(title, raw, thinkConversation);
+}
+
+async function _saveThinkItem(title, raw, conversation) {
+  if (!raw) { showToast("Nothing to save"); return; }
   const id = genId("in");
   const item = {
     id,
@@ -838,17 +915,16 @@ async function saveThink() {
     status:   "new",
     source:   think.source || "manual",
     raw,
-    conversation: [],
+    conversation,
     outputs:  [],
     contentIdeas: [],
     created:  new Date().toISOString().slice(0,10)
   };
-
   try {
     await saveNewInbox(item);
     closeThink();
     setView("inbox");
-    showToast("Added to Inbox");
+    showToast("Saved to Inbox");
   } catch(e) {
     showToast("Error saving — check connection");
     console.error(e);
@@ -888,7 +964,7 @@ function renderInbox(root) {
     </div>`;
 }
 
-function openInboxItem(id) {
+function renderInboxPanel(id) {
   const item = inboxItems.find(i => i.id === id);
   if (!item) return;
 
@@ -898,13 +974,6 @@ function openInboxItem(id) {
       <div class="conv-msg-text">${escHtml(msg.content)}</div>
     </div>`
   ).join("");
-
-  const outputsHtml = (item.contentIdeas||[]).length
-    ? `<div class="conv-outputs">
-        <div class="conv-output-label">Content Ideas</div>
-        ${item.contentIdeas.map(idea => `<div class="conv-output-item">${escHtml(idea)}</div>`).join("")}
-      </div>`
-    : "";
 
   document.getElementById("panel").innerHTML = `
     <div class="panel-close"><button onclick="closePanel()">Close</button></div>
@@ -918,22 +987,52 @@ function openInboxItem(id) {
         <div class="inbox-panel-raw"><p>${escHtml(item.raw||"")}</p></div>
       </div>
 
-      ${convHtml ? `<div class="panel-section"><div class="panel-section-label">Conversation</div><div class="conv-thread">${convHtml}</div></div>` : ""}
-
-      <div class="conv-input-wrap">
-        <textarea class="conv-input" id="conv-input-${id}" placeholder="Ask Claude about this thinking..." rows="2"></textarea>
-        <button class="conv-send-btn" onclick="sendConvMessage('${id}')">Send</button>
+      <div class="panel-section">
+        <div class="panel-section-label">Sparring</div>
+        <div class="conv-thread" id="inbox-conv-thread-${id}">${convHtml}</div>
+        <div class="conv-input-wrap" style="margin-top:8px">
+          <textarea class="conv-input" id="conv-input-${id}" placeholder="Reply to Claude..." rows="2"></textarea>
+          <button class="conv-send-btn" id="conv-send-${id}" onclick="sendConvMessage('${id}')">Send</button>
+        </div>
       </div>
-
-      ${outputsHtml}
 
       <div class="panel-actions">
         <button class="panel-action-btn" onclick="markInboxProcessed('${id}')">Mark Processed</button>
         <button class="panel-action-btn danger" onclick="confirmDeleteInbox('${id}')">Delete</button>
       </div>
     </div>`;
+}
 
+async function openInboxItem(id) {
+  const item = inboxItems.find(i => i.id === id);
+  if (!item) return;
+
+  renderInboxPanel(id);
   document.getElementById("overlay").classList.add("open");
+
+  // Auto-start sparring if no conversation yet
+  if (!item.conversation || item.conversation.length === 0) {
+    item.conversation = [{ role:"user", content: item.raw }];
+    const sendBtn = document.getElementById(`conv-send-${id}`);
+    if (sendBtn) { sendBtn.textContent = "..."; sendBtn.disabled = true; }
+
+    try {
+      const res = await fetch("/api/think-chat", {
+        method: "POST",
+        headers: { "Content-Type":"application/json" },
+        body: JSON.stringify({ conversation: item.conversation, beliefs: items })
+      });
+      const data = await res.json();
+      const reply = data.reply || "Something went wrong.";
+      item.conversation.push({ role:"assistant", content: reply });
+      await updateInboxItem(item);
+      renderInboxPanel(id); // re-render with conversation
+    } catch(e) {
+      console.error(e);
+    } finally {
+      if (sendBtn) { sendBtn.textContent = "Send"; sendBtn.disabled = false; }
+    }
+  }
 }
 
 async function sendConvMessage(id) {
@@ -950,23 +1049,21 @@ async function sendConvMessage(id) {
   sendBtn.textContent = "...";
 
   item.conversation = item.conversation || [];
+  item.conversation.push({ role:"user", content:userMsg });
 
-  // If this is the first message, prepend the raw dump as context
-  if (item.conversation.length === 0) {
-    item.conversation.push({ role:"user", content: `Here's my raw thinking:\n\n${item.raw}\n\n${userMsg}` });
-  } else {
-    item.conversation.push({ role:"user", content:userMsg });
-  }
+  // Optimistic render
+  const thread = document.getElementById(`inbox-conv-thread-${id}`);
+  if (thread) thread.innerHTML = item.conversation.map(msg =>
+    `<div class="conv-msg ${msg.role}">
+      <div class="conv-msg-role">${msg.role === "user" ? "You" : "Claude"}</div>
+      <div class="conv-msg-text">${escHtml(msg.content)}</div>
+    </div>`
+  ).join("");
 
-  // Call the AI sparring endpoint
   const aiRes = await fetch("/api/think-chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      conversation: item.conversation,
-      raw: item.raw,
-      beliefs: items
-    })
+    body: JSON.stringify({ conversation: item.conversation, beliefs: items })
   });
 
   const aiData = await aiRes.json();
@@ -977,7 +1074,7 @@ async function sendConvMessage(id) {
     await updateInboxItem(item);
     sendBtn.classList.remove("loading");
     sendBtn.textContent = "Send";
-    openInboxItem(id); // re-render panel
+    renderInboxPanel(id); // re-render conversation
   } catch(e) {
     showToast("Error saving conversation");
     sendBtn.classList.remove("loading");
