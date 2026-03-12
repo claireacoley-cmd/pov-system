@@ -1170,6 +1170,40 @@ textarea.cap-input { min-height: 60px; }
   white-space: pre-wrap;
 }
 
+/* Filing brief — inline in conversation */
+.filing-brief-card {
+  border: 1px solid var(--rule-dk);
+  border-left: 3px solid var(--ink);
+  padding: 14px 16px;
+  margin: 8px 0 4px;
+  background: var(--hover);
+}
+.filing-brief-hdr {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 10px;
+}
+.filing-brief-items { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.brief-item { display: flex; align-items: baseline; gap: 8px; }
+.brief-item-title { font-size: 12px; color: var(--ink); line-height: 1.4; }
+.filing-brief-btn {
+  background: var(--ink); color: var(--ivory);
+  border: none; padding: 6px 14px;
+  font-family: Montserrat, sans-serif; font-size: 11px; font-weight: 500;
+  letter-spacing: 0.05em; cursor: pointer;
+}
+.filing-brief-btn:hover { opacity: 0.85; }
+
+/* Filing review modal cards */
+.filing-card { padding: 20px 0; }
+.filing-card-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+
 /* Conversation thread */
 .conv-thread { display: flex; flex-direction: column; gap: 0; margin-bottom: 20px; }
 .conv-msg {

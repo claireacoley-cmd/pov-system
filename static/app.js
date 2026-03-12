@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════
 
 // ─── CONSTANTS ───
-const DOMAINS = ["Strategy","Brand","Content","Experience","Culture","Business"];
+const DOMAINS = ["Strategy","Brand","Content","Experience","Culture","Business","Teaching"];
 const FUNCS   = ["belief","proof","craft","teaching"];
 const SRC_TYPES = ["lived","their-story","example","perspective","pattern","data"];
 
@@ -37,6 +37,8 @@ let cap = { funcs:[], doms:[], beliefs:[], srcType:null, imageData:null, suggest
 let capStatus = "exploring";
 let think = { source:"Own thinking" };
 let debounceTimer = null;
+let lastFilingBrief = null;
+let lastFilingSourceInbox = null;
 
 // ─── API HELPERS ───
 const API = {
@@ -855,6 +857,227 @@ function convToNotes(conversation) {
   ).join("\n\n");
 }
 
+// ─── FILING BRIEF ───
+function parseFilingBrief(text) {
+  const m = text.match(/===FILING BRIEF===([\s\S]*?)===END FILING BRIEF===/);
+  if (!m) return null;
+  const blocks = m[1].split(/\n---\n/).map(b => b.trim()).filter(Boolean);
+  const items = blocks.map(block => {
+    const item = {};
+    const re = /^(\w+):\s*([\s\S]*?)(?=\n\w+:|$)/gm;
+    let match;
+    while ((match = re.exec(block)) !== null) item[match[1]] = match[2].trim();
+    return item;
+  }).filter(i => i.type && i.title);
+  return items.length ? items : null;
+}
+
+function getFilingBrief(conversation) {
+  const msgs = [...(conversation||[])].reverse();
+  for (const msg of msgs) {
+    if (msg.role === "assistant") {
+      const brief = parseFilingBrief(msg.content);
+      if (brief) return brief;
+    }
+  }
+  return null;
+}
+
+function renderConvMsg(msg) {
+  if (msg.role === "assistant") {
+    const brief = parseFilingBrief(msg.content);
+    if (brief) {
+      const preBrief = msg.content.slice(0, msg.content.indexOf("===FILING BRIEF===")).trim();
+      const itemsHtml = brief.map(it =>
+        `<div class="brief-item"><span class="card-func">${it.type}</span><span class="brief-item-title">${escHtml(it.title)}</span></div>`
+      ).join("");
+      return `<div class="conv-msg assistant">
+        <div class="conv-msg-role">Claude</div>
+        ${preBrief ? `<div class="conv-msg-text">${escHtml(preBrief)}</div>` : ""}
+        <div class="filing-brief-card">
+          <div class="filing-brief-hdr">Ready to file — ${brief.length} item${brief.length !== 1 ? "s" : ""}</div>
+          <div class="filing-brief-items">${itemsHtml}</div>
+          <button class="filing-brief-btn" onclick="openFilingReview()">Review & File →</button>
+        </div>
+      </div>`;
+    }
+  }
+  return `<div class="conv-msg ${msg.role}">
+    <div class="conv-msg-role">${msg.role === "user" ? "You" : "Claude"}</div>
+    <div class="conv-msg-text">${escHtml(msg.content)}</div>
+  </div>`;
+}
+
+const escAttr = s => (s||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
+
+function openFilingReview() {
+  if (!lastFilingBrief || !lastFilingBrief.length) return;
+  document.getElementById("filing-cards").innerHTML = renderFilingCards(lastFilingBrief);
+  document.getElementById("filing-overlay").classList.add("open");
+}
+
+function closeFilingReview() {
+  document.getElementById("filing-overlay").classList.remove("open");
+}
+
+function renderFilingCards(items) {
+  return items.map((item, i) => {
+    const isB = item.type === "belief";
+    const isP = item.type === "proof";
+    const isC = item.type === "craft";
+
+    const statusChips = isB ? `
+      <div class="cap-section">
+        <label>Status</label>
+        <div class="cap-chips">${["exploring","developing","conviction"].map(s =>
+          `<button class="cap-chip ${(item.status||"exploring")===s?"selected":""}" onclick="pickFilingChip(this)" data-s="${s}">${s}</button>`
+        ).join("")}</div>
+      </div>` : "";
+
+    const sourceChips = isP ? `
+      <div class="cap-section">
+        <label>Source type</label>
+        <div class="cap-chips">${Object.entries(srcLabels).map(([k,v]) =>
+          `<button class="cap-chip ${(item.source||"example")===k?"selected":""}" onclick="pickFilingChip(this)" data-s="${k}">${v}</button>`
+        ).join("")}</div>
+      </div>` : "";
+
+    const principleField = isC ? `
+      <div class="cap-section">
+        <label>Craft principle</label>
+        <input type="text" class="cap-input" id="fp-${i}" value="${escAttr(item.principle||"")}">
+      </div>` : "";
+
+    const connectsTo = item.connects_to && item.connects_to !== "none" ? `
+      <div class="cap-section" style="padding:10px 0;border-top:1px solid var(--rule)">
+        <label>Connects to</label>
+        <p style="font-size:12px;color:var(--dim);margin:4px 0 0">${escHtml(item.connects_to)}</p>
+      </div>` : "";
+
+    return `<div class="filing-card" data-idx="${i}" data-type="${item.type}">
+      <div class="filing-card-hdr">
+        <span class="card-func">${item.type}</span>
+        <span style="font-size:11px;color:var(--faint)">${i+1} of ${items.length}</span>
+      </div>
+      <div class="cap-section">
+        <label>Title</label>
+        <input type="text" class="cap-input" id="ft-${i}" value="${escAttr(item.title||"")}">
+      </div>
+      <div class="cap-section">
+        <label>Notes</label>
+        <textarea class="cap-input" id="fn-${i}" style="min-height:100px">${escHtml(item.notes||"")}</textarea>
+      </div>
+      <div class="cap-section">
+        <label>Why saved</label>
+        <textarea class="cap-input" id="fw-${i}" style="min-height:44px">${escHtml(item.why||"")}</textarea>
+      </div>
+      ${statusChips}${sourceChips}${principleField}${connectsTo}
+    </div>`;
+  }).join(`<div style="height:1px;background:var(--rule-dk);margin:8px 0"></div>`);
+}
+
+function pickFilingChip(el) {
+  el.closest(".cap-chips").querySelectorAll(".cap-chip").forEach(c => c.classList.remove("selected"));
+  el.classList.add("selected");
+}
+
+async function saveFilingBatch() {
+  const cards = document.querySelectorAll(".filing-card");
+  if (!cards.length) return;
+
+  const btn = document.getElementById("filing-save-btn");
+  btn.textContent = "Saving..."; btn.disabled = true;
+
+  // Collect edited values
+  const batch = [];
+  cards.forEach((card, i) => {
+    const type      = card.dataset.type;
+    const title     = document.getElementById(`ft-${i}`).value.trim();
+    const notes     = document.getElementById(`fn-${i}`).value.trim();
+    const why       = document.getElementById(`fw-${i}`).value.trim();
+    const chipSel   = card.querySelector(".cap-chip.selected");
+    const chipVal   = chipSel ? chipSel.dataset.s : null;
+    const status    = type === "belief" ? (chipVal || "exploring") : null;
+    const source    = type === "proof"  ? (chipVal || "example")   : null;
+    const principleEl = document.getElementById(`fp-${i}`);
+    const principle = principleEl ? principleEl.value.trim() : null;
+    const briefItem = lastFilingBrief[i] || {};
+    const connectsTo = briefItem.connects_to && briefItem.connects_to !== "none" ? briefItem.connects_to : null;
+    const prefix    = type === "belief" ? "b" : type === "proof" ? "e" : type === "craft" ? "x" : "t";
+    batch.push({ type, title, notes, why, status, source, principle, connectsTo, id: genId(prefix) });
+  });
+
+  // Linking — batch belief is the anchor
+  const batchBelief = batch.find(b => b.type === "belief");
+
+  function resolveBeliefIds(connectsTo) {
+    const ids = [];
+    if (batchBelief) ids.push(batchBelief.id);
+    if (connectsTo) {
+      const lower = connectsTo.toLowerCase().slice(0, 30);
+      const found = items.find(i => i.functions.includes("belief") && i.title.toLowerCase().includes(lower));
+      if (found && !ids.includes(found.id)) ids.push(found.id);
+    }
+    return ids;
+  }
+
+  const toSave = batch.map(item => {
+    const n = {
+      id: item.id, functions: [item.type], title: item.title,
+      body: item.notes || item.title, domains: ["Strategy"],
+      keywords: item.title.toLowerCase().split(/\s+/).filter(w => w.length > 3),
+      created: new Date().toISOString().slice(0,10)
+    };
+    if (item.why) n.whySaved = item.why;
+    if (item.type === "belief") {
+      n.status = item.status || "exploring";
+      n.linkedIds = batch.filter(b => b.type !== "belief").map(b => b.id);
+    }
+    if (item.type === "proof") {
+      n.sourceType = item.source || "example";
+      n.supportsBelief = resolveBeliefIds(item.connectsTo);
+    }
+    if (item.type === "craft") {
+      if (item.principle) n.principle = item.principle;
+      n.relatedBelief = resolveBeliefIds(item.connectsTo);
+    }
+    return n;
+  });
+
+  try {
+    for (const item of toSave) await saveNewItem(item);
+
+    // Update existing beliefs' linkedIds with new proof/craft
+    for (const item of toSave) {
+      const relIds = [...(item.supportsBelief||[]), ...(item.relatedBelief||[])];
+      for (const bId of relIds) {
+        if (batchBelief && bId === batchBelief.id) continue;
+        const existing = get(bId);
+        if (existing && existing.linkedIds && !existing.linkedIds.includes(item.id)) {
+          existing.linkedIds.push(item.id);
+          updateItem(existing).catch(console.error);
+        }
+      }
+    }
+
+    if (lastFilingSourceInbox) {
+      await apiFetch(`${API.inbox}?id=${lastFilingSourceInbox}`, { method:"DELETE" }).catch(console.error);
+      inboxItems = inboxItems.filter(i => i.id !== lastFilingSourceInbox);
+    }
+
+    closeFilingReview();
+    closeThink();
+    closePanel();
+    render();
+    showToast(`Filed ${toSave.length} item${toSave.length !== 1 ? "s" : ""}`);
+  } catch(e) {
+    showToast("Error saving — check connection");
+    console.error(e);
+  } finally {
+    btn.textContent = "Save All →"; btn.disabled = false;
+  }
+}
+
 // ─── THINK MODAL ───
 let thinkConversation = [];
 
@@ -929,14 +1152,21 @@ async function callThinkSpar() {
 }
 
 function renderThinkConv() {
+  lastFilingBrief = getFilingBrief(thinkConversation);
+  lastFilingSourceInbox = null;
+
   const thread = document.getElementById("think-conv-thread");
-  thread.innerHTML = thinkConversation.map(msg =>
-    `<div class="conv-msg ${msg.role}">
-      <div class="conv-msg-role">${msg.role === "user" ? "You" : "Claude"}</div>
-      <div class="conv-msg-text">${escHtml(msg.content)}</div>
-    </div>`
-  ).join("");
-  // Scroll to bottom
+  thread.innerHTML = thinkConversation.map(renderConvMsg).join("");
+
+  // Show "Review & File →" and demote "File as Belief" when brief is ready
+  const filingBtn = document.getElementById("think-filing-btn");
+  const beliefBtn = document.getElementById("think-file-belief-btn");
+  if (filingBtn) {
+    filingBtn.style.display = lastFilingBrief ? "inline-block" : "none";
+    filingBtn.classList.toggle("primary", !!lastFilingBrief);
+  }
+  if (beliefBtn) beliefBtn.classList.toggle("primary", !lastFilingBrief);
+
   const scroll = document.getElementById("think-conv-scroll");
   if (scroll) scroll.scrollTop = scroll.scrollHeight;
 }
@@ -1046,12 +1276,15 @@ function renderInboxPanel(id) {
   const item = inboxItems.find(i => i.id === id);
   if (!item) return;
 
-  const convHtml = (item.conversation||[]).map(msg =>
-    `<div class="conv-msg ${msg.role}">
-      <div class="conv-msg-role">${msg.role === "user" ? "You" : "Claude"}</div>
-      <div class="conv-msg-text">${escHtml(msg.content)}</div>
-    </div>`
-  ).join("");
+  // Set filing brief state for this inbox item
+  lastFilingBrief = getFilingBrief(item.conversation || []);
+  lastFilingSourceInbox = id;
+
+  const convHtml = (item.conversation||[]).map(renderConvMsg).join("");
+
+  const filingBtn = lastFilingBrief
+    ? `<button class="panel-action-btn primary" onclick="openFilingReview()">Review & File →</button>`
+    : `<button class="panel-action-btn primary" onclick="promoteInboxItem('${id}')">File as Belief →</button>`;
 
   document.getElementById("panel").innerHTML = `
     <div class="panel-close"><button onclick="closePanel()">Close</button></div>
@@ -1081,7 +1314,7 @@ function renderInboxPanel(id) {
       </div>
 
       <div class="panel-actions">
-        <button class="panel-action-btn primary" onclick="promoteInboxItem('${id}')">File as Belief →</button>
+        ${filingBtn}
         <button class="panel-action-btn" onclick="markInboxProcessed('${id}')">Mark Processed</button>
         <button class="panel-action-btn danger" onclick="confirmDeleteInbox('${id}')">Delete</button>
       </div>

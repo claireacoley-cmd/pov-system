@@ -231,10 +231,29 @@
       <div class="cap-actions">
         <button class="cap-btn" onclick="closeThink()">Discard</button>
         <button class="cap-btn" onclick="saveThinkWithConv()">Save to Inbox</button>
-        <button class="cap-btn primary" onclick="fileThinkAsBelief()">File as Belief →</button>
+        <button class="cap-btn" id="think-filing-btn" style="display:none" onclick="openFilingReview()">Review & File →</button>
+        <button class="cap-btn primary" id="think-file-belief-btn" onclick="fileThinkAsBelief()">File as Belief →</button>
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- ── FILING REVIEW MODAL ── -->
+<div class="cap-overlay" id="filing-overlay">
+  <div class="cap-panel">
+    <div class="cap-hdr">
+      <h2>Review & File</h2>
+      <p>Check each item before saving. Edit anything that's off.</p>
+      <button class="cap-close" onclick="closeFilingReview()">×</button>
+    </div>
+    <div class="cap-scroll" id="filing-cards-scroll">
+      <div id="filing-cards"></div>
+    </div>
+    <div class="cap-actions">
+      <button class="cap-btn" onclick="closeFilingReview()">Cancel</button>
+      <button class="cap-btn primary" id="filing-save-btn" onclick="saveFilingBatch()">Save All →</button>
+    </div>
   </div>
 </div>
 
