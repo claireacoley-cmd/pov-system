@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POV System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- ── SIDEBAR ── -->
+  <div class="sidebar">
+    <div class="sidebar-hdr">
+      <svg class="sidebar-logo" width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 24 Q24 6 42 24" stroke="currentColor" stroke-width="1.2" fill="none"/>
+        <path d="M6 24 Q24 42 42 24" stroke="currentColor" stroke-width="1.2" fill="none"/>
+        <circle cx="24" cy="24" r="7" stroke="currentColor" stroke-width="1.2" fill="none"/>
+        <circle cx="24" cy="24" r="3" fill="currentColor"/>
+        <line x1="10" y1="17" x2="14" y2="13" stroke="currentColor" stroke-width="1.2"/>
+        <line x1="24" y1="13" x2="24" y2="8" stroke="currentColor" stroke-width="1.2"/>
+        <line x1="38" y1="17" x2="34" y2="13" stroke="currentColor" stroke-width="1.2"/>
+      </svg>
+      <h1>POV System</h1>
+    </div>
+    <div class="sidebar-nav" id="snav"></div>
+    <div class="sidebar-list" id="slist"></div>
+  </div>
+
+  <!-- ── MAIN ── -->
+  <div class="main">
+    <div class="dashboard" id="dash"></div>
+
+    <!-- ── TOPBAR / FILTERS ── -->
+    <div class="topbar" id="topbar">
+      <div class="filter-row">
+        <span class="filter-label">Function</span>
+        <div class="ft-chips" id="ff"></div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">Domain</span>
+        <div class="ft-chips" id="df"></div>
+        <div class="search-wrap">
+          <input type="text" id="search" placeholder="Search...">
+        </div>
+      </div>
+    </div>
+
+    <div id="view-root"></div>
+  </div>
+
+</div>
+
+<!-- ── DETAIL PANEL ── -->
+<div class="overlay" id="overlay">
+  <div class="panel" id="panel"></div>
+</div>
+
+<!-- ── CAPTURE MODAL ── -->
+<div class="cap-overlay" id="cap-overlay">
+  <div class="cap-panel">
+    <div class="cap-hdr">
+      <h2>Capture</h2>
+      <p>Add to your POV system. Start typing and we'll suggest connections.</p>
+      <button class="cap-close" onclick="closeCapture()">×</button>
+    </div>
+    <div class="cap-scroll">
+      <div class="sug-banner hidden" id="sug-banner">
+        <span class="sug-icon">◆</span>
+        <span id="sug-text"></span>
+      </div>
+
+      <div class="cap-section">
+        <label>Image</label>
+        <div class="cap-dropzone" id="dropzone">
+          <input type="file" accept="image/*" id="file-input">
+          <p>Drop image or click to browse</p>
+          <span class="hint">Screenshots, photos, visual refs</span>
+        </div>
+        <div class="cap-preview" id="cap-preview" style="display:none">
+          <img id="preview-img" alt="">
+          <button class="cap-preview-rm" onclick="removeImage()">×</button>
+        </div>
+      </div>
+
+      <div class="cap-section">
+        <label>Title</label>
+        <input type="text" class="cap-input" id="cap-title" placeholder="What is this?" oninput="runSuggestions()">
+      </div>
+
+      <div class="cap-section">
+        <label>Notes</label>
+        <textarea class="cap-input" id="cap-notes" placeholder="What did you notice? Why does this matter?" oninput="debounceRun()"></textarea>
+      </div>
+
+      <div class="cap-section">
+        <label>Why are you saving this?</label>
+        <textarea class="cap-input" id="cap-why" placeholder="The reason you'll need this later..." style="min-height:44px" oninput="debounceRun()"></textarea>
+      </div>
+
+      <div class="cap-section">
+        <label>Source URL</label>
+        <input type="url" class="cap-input" id="cap-url" placeholder="https://...">
+      </div>
+
+      <div class="cap-section">
+        <label>Function</label>
+        <div class="cap-chips" id="cap-funcs"></div>
+      </div>
+
+      <div class="cap-section" id="src-type-section" style="display:none">
+        <label>What kind of proof?</label>
+        <div class="cap-src-types" id="cap-src-types">
+          <div class="cap-src" data-s="lived" onclick="pickSrc(this)">
+            <span class="cap-src-icon">◉</span>
+            <span class="cap-src-label">My Story</span>
+            <span class="cap-src-hint">Something I lived</span>
+          </div>
+          <div class="cap-src" data-s="their-story" onclick="pickSrc(this)">
+            <span class="cap-src-icon">◎</span>
+            <span class="cap-src-label">Their Story</span>
+            <span class="cap-src-hint">Someone else's account</span>
+          </div>
+          <div class="cap-src" data-s="example" onclick="pickSrc(this)">
+            <span class="cap-src-icon">◈</span>
+            <span class="cap-src-label">Example</span>
+            <span class="cap-src-hint">Brand or case study</span>
+          </div>
+          <div class="cap-src" data-s="perspective" onclick="pickSrc(this)">
+            <span class="cap-src-icon">◇</span>
+            <span class="cap-src-label">Perspective</span>
+            <span class="cap-src-hint">Someone's stated view</span>
+          </div>
+          <div class="cap-src" data-s="pattern" onclick="pickSrc(this)">
+            <span class="cap-src-icon">◈</span>
+            <span class="cap-src-label">Pattern</span>
+            <span class="cap-src-hint">I keep noticing this</span>
+          </div>
+          <div class="cap-src" data-s="data" onclick="pickSrc(this)">
+            <span class="cap-src-icon">◻</span>
+            <span class="cap-src-label">Data</span>
+            <span class="cap-src-hint">Numbers or research</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cap-section">
+        <label>Domains</label>
+        <div class="cap-chips" id="cap-doms"></div>
+      </div>
+
+      <div class="cap-section" id="cap-beliefs-section" style="display:none">
+        <label>Connects to beliefs</label>
+        <div class="cap-belief-list" id="cap-beliefs"></div>
+        <div class="cap-or">or add a new belief</div>
+        <div class="cap-new-belief-row">
+          <input type="text" class="cap-input" id="cap-new-belief" placeholder="New belief title...">
+          <button class="cap-add-btn" onclick="addNewBelief()">Add</button>
+        </div>
+      </div>
+
+    </div>
+    <div class="cap-actions">
+      <button class="cap-btn" onclick="closeCapture()">Cancel</button>
+      <button class="cap-btn primary" onclick="saveCapture()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── THINK MODAL (Inbox dump) ── -->
+<div class="think-overlay" id="think-overlay">
+  <div class="think-panel">
+    <div class="cap-hdr">
+      <h2>Think</h2>
+      <p>Dump raw thinking. Don't worry about what it is yet.</p>
+      <button class="cap-close" onclick="closeThink()">×</button>
+    </div>
+    <div class="cap-scroll">
+      <div class="cap-section">
+        <label>Title (optional)</label>
+        <input type="text" class="cap-input" id="think-title" placeholder="Give it a rough name...">
+      </div>
+      <div class="cap-section">
+        <label>Raw thinking</label>
+        <textarea class="cap-input" id="think-dump" placeholder="Just dump it. Questions, observations, half-formed ideas. Don't filter." style="min-height:140px"></textarea>
+      </div>
+      <div class="cap-section">
+        <label>Where did this come from?</label>
+        <div class="cap-chips">
+          <button class="cap-chip think-source-chip active" onclick="pickThinkSource(this)">Own thinking</button>
+          <button class="cap-chip think-source-chip" onclick="pickThinkSource(this)">Conversation</button>
+          <button class="cap-chip think-source-chip" onclick="pickThinkSource(this)">Podcast</button>
+          <button class="cap-chip think-source-chip" onclick="pickThinkSource(this)">Reading</button>
+          <button class="cap-chip think-source-chip" onclick="pickThinkSource(this)">Observation</button>
+        </div>
+      </div>
+    </div>
+    <div class="cap-actions">
+      <button class="cap-btn" onclick="closeThink()">Cancel</button>
+      <button class="cap-btn primary" onclick="saveThink()">Add to Inbox</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── FAB ── -->
+<div class="fab-wrap" id="fab-wrap">
+  <button class="fab" id="fab-main" onclick="toggleFab()">+</button>
+  <div class="fab-menu" id="fab-menu">
+    <button class="fab-item" onclick="openCapture(); toggleFab()">
+      <span class="fab-item-label">Capture</span>
+      <svg width="18" height="18" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="color:var(--faint)">
+        <path d="M8 8 L24 28 L40 8" stroke="currentColor" stroke-width="1.2" fill="none"/>
+        <path d="M8 8 Q24 16 40 8" stroke="currentColor" stroke-width="1.2" fill="none"/>
+        <path d="M12 14 Q24 20 36 14" stroke="currentColor" stroke-width="0.8" fill="none"/>
+        <path d="M16 20 Q24 24 32 20" stroke="currentColor" stroke-width="0.8" fill="none"/>
+        <line x1="24" y1="28" x2="24" y2="40" stroke="currentColor" stroke-width="1.2"/>
+        <line x1="20" y1="40" x2="28" y2="40" stroke="currentColor" stroke-width="1.2"/>
+      </svg>
+    </button>
+    <button class="fab-item" onclick="openThink(); toggleFab()">
+      <span class="fab-item-label">Think</span>
+      <svg width="18" height="18" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="color:var(--faint)">
+        <polyline points="2,24 10,24 13,22 15,24 17,24 19,24 21,30 23,10 25,34 27,18 29,24 32,24 35,21 38,24 46,24" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast"></div>
+
+<script src="static/app.js"></script>
+</body>
+</html>

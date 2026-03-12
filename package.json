@@ -1,0 +1,14 @@
+{
+  "name": "pov-system",
+  "version": "1.0.0",
+  "description": "POV System — Beliefs, Proof, Craft",
+  "scripts": {
+    "dev": "netlify dev"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.0.0"
+  }
+}
