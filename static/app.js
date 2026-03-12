@@ -258,7 +258,7 @@ function rDash() {
       <div class="dash-hero-overlay"></div>
       <div class="dash-hero-flash"></div>
       <div class="dash-hero-title">
-        <h2>POV System</h2>
+        <h2>Build a POV worth storing</h2>
         <p>Beliefs · Proof · Craft</p>
       </div>
     </div>
