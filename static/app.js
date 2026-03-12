@@ -408,14 +408,11 @@ function rContent() {
 
   root.innerHTML = `
     <div class="content">
-      <div class="view-hdr">
-        <h2>${title}</h2>
-        <p>${sub}</p>
-      </div>
+      ${S.belief ? "" : `<div class="view-hdr"><h2>${title}</h2><p>${sub}</p></div>`}
       ${beliefFocusHtml}
       ${f.length
         ? `<div class="${gridClass}">${f.map(rCard).join("")}</div>`
-        : `<div class="empty-state"><p>No items match</p></div>`}
+        : `<div class="empty-state"><p>${S.belief ? "No connected items yet" : "No items match"}</p></div>`}
     </div>`;
 }
 
