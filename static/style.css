@@ -1141,6 +1141,21 @@ textarea.cap-input { min-height: 60px; }
 }
 
 /* ─── INBOX PANEL (detail) ─── */
+.inbox-panel-agreed {
+  background: var(--hover);
+  padding: 16px;
+  border: 1px solid var(--rule-dk);
+  border-left: 3px solid var(--ink);
+  margin-bottom: 20px;
+}
+.inbox-panel-agreed p {
+  font-size: 13px;
+  color: var(--ink);
+  font-weight: 400;
+  line-height: 1.7;
+  font-style: italic;
+}
+
 .inbox-panel-raw {
   background: var(--ivory);
   padding: 16px;

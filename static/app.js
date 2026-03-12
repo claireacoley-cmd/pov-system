@@ -827,13 +827,18 @@ function removeImage() {
 
 // ─── CONVERSATION HELPERS ───
 function extractBeliefFromConv(conversation) {
-  // Pull last bold statement from Claude messages — that's usually the refined belief
+  // Pull the last bold statement from Claude messages — that's the refined/agreed output
+  // Try to get the longest bold block (full articulated belief, not just a label)
   const claudeMsgs = (conversation || []).filter(m => m.role === "assistant").reverse();
+  let best = "";
   for (const msg of claudeMsgs) {
-    const match = msg.content.match(/\*\*([^*]{20,})\*\*/);
-    if (match) return match[1];
+    const matches = [...msg.content.matchAll(/\*\*([^*]{20,})\*\*/g)];
+    for (const m of matches) {
+      if (m[1].length > best.length) best = m[1];
+    }
+    if (best.length > 80) return best; // got a proper statement, stop looking
   }
-  return "";
+  return best;
 }
 
 function convToNotes(conversation) {
@@ -948,9 +953,9 @@ function fileThinkAsBelief() {
   closeThink();
   openCapture({
     funcs: ["belief"],
-    title: extracted || thinkTitle || "",
-    notes: convToNotes(thinkConversation),
-    why:   raw.slice(0, 200)
+    title: thinkTitle || extracted.slice(0, 80) || "",
+    notes: extracted || raw,   // agreed output as the belief body, not the full transcript
+    why:   raw.slice(0, 300)
   });
 }
 
@@ -959,20 +964,23 @@ function promoteInboxItem(id) {
   if (!item) return;
   closePanel();
   const extracted = extractBeliefFromConv(item.conversation || []);
+  const agreedOutput = item.agreedOutput || extracted;
   openCapture({
     funcs: ["belief"],
-    title: extracted || item.title || "",
-    notes: convToNotes(item.conversation || []),
-    why:   (item.raw || "").slice(0, 200)
+    title: agreedOutput.slice(0, 80) || item.title || "",
+    notes: agreedOutput || item.raw,   // agreed output as the belief body
+    why:   (item.raw || "").slice(0, 300)
   });
 }
 
 async function _saveThinkItem(title, raw, conversation) {
   if (!raw) { showToast("Nothing to save"); return; }
   const id = genId("in");
+  const agreedOutput = extractBeliefFromConv(conversation);
   const item = {
     id,
-    title:    title || raw.slice(0, 60),
+    title:    title || agreedOutput.slice(0, 80) || raw.slice(0, 60),
+    agreedOutput: agreedOutput || null,
     status:   "new",
     source:   think.source || "manual",
     raw,
@@ -1042,6 +1050,12 @@ function renderInboxPanel(id) {
       <div class="panel-funcs"><span class="card-domain">${item.source||"manual"}</span></div>
       <h2>${escHtml(item.title||"Untitled")}</h2>
       <span class="panel-date">${item.created||""}</span>
+
+      ${(item.agreedOutput || extractBeliefFromConv(item.conversation||[])) ? `
+      <div class="panel-section">
+        <div class="panel-section-label">Agreed Output</div>
+        <div class="inbox-panel-agreed"><p>${escHtml(item.agreedOutput || extractBeliefFromConv(item.conversation||[]))}</p></div>
+      </div>` : ""}
 
       <div class="panel-section">
         <div class="panel-section-label">Raw Thinking</div>
