@@ -562,6 +562,7 @@ function openCapture(prefill) {
   document.getElementById("file-input").value   = "";
   document.getElementById("sug-banner").classList.add("hidden");
   if (prefill && prefill.funcs) cap.funcs = prefill.funcs;
+  if (prefill && prefill.sourceInboxId) cap.sourceInboxId = prefill.sourceInboxId;
   renderCapAll();
   document.getElementById("cap-overlay").classList.add("open");
 }
@@ -747,6 +748,12 @@ async function saveCapture() {
 
   try {
     await saveNewItem(newItem);
+    // If filed from inbox, delete the source inbox item
+    if (cap.sourceInboxId) {
+      const srcId = cap.sourceInboxId;
+      await apiFetch(`${API.inbox}?id=${srcId}`, { method:"DELETE" }).catch(console.error);
+      inboxItems = inboxItems.filter(i => i.id !== srcId);
+    }
     closeCapture();
     render();
     showToast(`Saved "${title}"`);
@@ -968,8 +975,9 @@ function promoteInboxItem(id) {
   openCapture({
     funcs: ["belief"],
     title: agreedOutput.slice(0, 80) || item.title || "",
-    notes: agreedOutput || item.raw,   // agreed output as the belief body
-    why:   (item.raw || "").slice(0, 300)
+    notes: agreedOutput || item.raw,
+    why:   (item.raw || "").slice(0, 300),
+    sourceInboxId: id
   });
 }
 
