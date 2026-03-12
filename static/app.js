@@ -258,12 +258,7 @@ function rDash() {
         <p>Beliefs · Proof · Craft</p>
       </div>
     </div>
-    <div class="dash-stats">
-      <div class="dash-stat"><span class="dash-stat-n">${bc}</span><span class="dash-stat-l">Beliefs</span></div>
-      <div class="dash-stat"><span class="dash-stat-n">${pc}</span><span class="dash-stat-l">Proof</span></div>
-      <div class="dash-stat"><span class="dash-stat-n">${cc}</span><span class="dash-stat-l">Craft</span></div>
-      <div class="dash-stat" style="cursor:pointer" onclick="setView('inbox')"><span class="dash-stat-n">${ic}</span><span class="dash-stat-l">Inbox</span></div>
-    </div>`;
+`;
 }
 
 function rSidebar() {
@@ -404,17 +399,13 @@ function rContent() {
     }
   }
 
-  const gridClass = `card-grid${S.layout==="visual"?" visual":""}${S.layout==="list"?" list":""}`;
+  const gridClass = `card-grid`;
 
   root.innerHTML = `
     <div class="content">
       <div class="view-hdr">
         <h2>${title}</h2>
         <p>${sub}</p>
-        <div class="view-toggle" style="margin-left:auto">
-          <button class="vt-btn ${S.layout==='list'?'active':''}" id="vt-list" onclick="setLayout('list')">≡</button>
-          <button class="vt-btn ${S.layout==='visual'?'active':''}" id="vt-visual" onclick="setLayout('visual')">⊞</button>
-        </div>
       </div>
       ${beliefFocusHtml}
       ${f.length

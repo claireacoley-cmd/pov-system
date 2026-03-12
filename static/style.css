@@ -441,8 +441,6 @@ input, textarea { font-family: 'Montserrat', sans-serif; }
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 12px;
 }
-.card-grid.list { grid-template-columns: 1fr; }
-.card-grid.visual { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
 
 .card {
   background: var(--white);
@@ -508,12 +506,13 @@ input, textarea { font-family: 'Montserrat', sans-serif; }
 }
 
 .card-title {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
   color: var(--ink);
   line-height: 1.4;
   margin-bottom: 8px;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .card-body {
