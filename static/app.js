@@ -1318,14 +1318,19 @@ async function confirmDeleteContent(id) {
 
 // ─── NAV & FILTERS ───
 function setView(v) {
-  S.view = v;
+  S.view   = v;
   S.belief = null;
+  S.funcF  = null;
+  S.srcF   = null;
+  S.domF   = null;
   render();
 }
 
 function focusBelief(id) {
   S.belief = S.belief === id ? null : id;
   S.view   = "all";
+  S.funcF  = null;
+  S.srcF   = null;
   render();
 }
 
