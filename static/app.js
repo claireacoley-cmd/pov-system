@@ -950,11 +950,27 @@ async function sendConvMessage(id) {
   sendBtn.textContent = "...";
 
   item.conversation = item.conversation || [];
-  item.conversation.push({ role:"user", content:userMsg });
 
-  // Simulate a placeholder — in real use this would call an AI endpoint
-  // For now: echo with a note that this needs an AI endpoint
-  const assistantReply = `[AI response would appear here — connect an AI endpoint to /api/think-chat to enable this feature]`;
+  // If this is the first message, prepend the raw dump as context
+  if (item.conversation.length === 0) {
+    item.conversation.push({ role:"user", content: `Here's my raw thinking:\n\n${item.raw}\n\n${userMsg}` });
+  } else {
+    item.conversation.push({ role:"user", content:userMsg });
+  }
+
+  // Call the AI sparring endpoint
+  const aiRes = await fetch("/api/think-chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      conversation: item.conversation,
+      raw: item.raw,
+      beliefs: items
+    })
+  });
+
+  const aiData = await aiRes.json();
+  const assistantReply = aiData.reply || "Something went wrong — try again.";
   item.conversation.push({ role:"assistant", content:assistantReply });
 
   try {
