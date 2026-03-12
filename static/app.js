@@ -4,7 +4,7 @@
 
 // ─── CONSTANTS ───
 const DOMAINS = ["Strategy","Brand","Content","Experience","Culture","Business"];
-const FUNCS   = ["belief","proof","craft"];
+const FUNCS   = ["belief","proof","craft","teaching"];
 const SRC_TYPES = ["lived","their-story","example","perspective","pattern","data"];
 
 const domainKeywords = {
@@ -136,10 +136,11 @@ function filt() {
   if (S.belief) {
     const b = get(S.belief);
     if (b) {
-      const linked_ids = new Set([S.belief, ...(b.linkedIds||[])]);
+      // Don't include the belief itself — it's shown in the focused belief header
+      const linked_ids = new Set([...(b.linkedIds||[])]);
       items.filter(i => (i.supportsBelief||[]).includes(S.belief) || (i.relatedBelief||[]).includes(S.belief))
            .forEach(i => linked_ids.add(i.id));
-      f = items.filter(i => linked_ids.has(i.id));
+      f = items.filter(i => linked_ids.has(i.id) && i.id !== S.belief);
     }
   }
   if (S.view !== "all" && !S.belief) f = f.filter(i => i.functions.includes(S.view));
@@ -269,25 +270,28 @@ function rSidebar() {
     proof:  `<svg width="13" height="13" viewBox="0 0 48 48" fill="none"><path d="M8 8 L24 28 L40 8" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M8 8 Q24 16 40 8" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="24" y1="28" x2="24" y2="40" stroke="currentColor" stroke-width="1.2"/><line x1="20" y1="40" x2="28" y2="40" stroke="currentColor" stroke-width="1.2"/></svg>`,
     craft:  `<svg width="13" height="13" viewBox="0 0 48 48" fill="none"><line x1="24" y1="4" x2="24" y2="20" stroke="currentColor" stroke-width="1.2"/><path d="M24 20 Q24 26 18 32 Q14 36 10 42" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M24 20 Q24 28 24 34 Q24 38 24 44" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M24 20 Q24 26 30 32 Q34 36 38 42" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>`,
     inbox:  `<svg width="13" height="13" viewBox="0 0 48 48" fill="none"><polyline points="2,24 10,24 13,22 15,24 17,24 19,24 21,30 23,10 25,34 27,18 29,24 32,24 35,21 38,24 46,24" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/></svg>`,
-    content:`<svg width="13" height="13" viewBox="0 0 48 48" fill="none"><path d="M36 4 Q28 12 24 24 Q22 30 20 38" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M36 4 Q32 8 36 12" stroke="currentColor" stroke-width="0.8" fill="none"/><path d="M34 8 Q30 12 34 16" stroke="currentColor" stroke-width="0.8" fill="none"/><path d="M20 38 L18 44" stroke="currentColor" stroke-width="1.2"/><path d="M20 38 L22 44" stroke="currentColor" stroke-width="1.2"/></svg>`
+    content:`<svg width="13" height="13" viewBox="0 0 48 48" fill="none"><path d="M36 4 Q28 12 24 24 Q22 30 20 38" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M36 4 Q32 8 36 12" stroke="currentColor" stroke-width="0.8" fill="none"/><path d="M34 8 Q30 12 34 16" stroke="currentColor" stroke-width="0.8" fill="none"/><path d="M20 38 L18 44" stroke="currentColor" stroke-width="1.2"/><path d="M20 38 L22 44" stroke="currentColor" stroke-width="1.2"/></svg>`,
+    teaching:`<svg width="13" height="13" viewBox="0 0 48 48" fill="none"><line x1="8" y1="12" x2="40" y2="12" stroke="currentColor" stroke-width="1.2"/><line x1="8" y1="12" x2="8" y2="36" stroke="currentColor" stroke-width="1.2"/><line x1="40" y1="12" x2="40" y2="36" stroke="currentColor" stroke-width="1.2"/><line x1="8" y1="36" x2="40" y2="36" stroke="currentColor" stroke-width="1.2"/><line x1="24" y1="36" x2="24" y2="44" stroke="currentColor" stroke-width="1.2"/><line x1="16" y1="44" x2="32" y2="44" stroke="currentColor" stroke-width="1.2"/><line x1="14" y1="22" x2="34" y2="22" stroke="currentColor" stroke-width="1"/><line x1="14" y1="28" x2="28" y2="28" stroke="currentColor" stroke-width="1"/></svg>`
   };
 
   const navItems = [
-    { k:"all",     l:"All" },
-    { k:"belief",  l:"Beliefs" },
-    { k:"proof",   l:"Proof" },
-    { k:"craft",   l:"Craft" },
-    { k:"inbox",   l:"Inbox" },
-    { k:"content", l:"Content" }
+    { k:"all",      l:"All" },
+    { k:"belief",   l:"Beliefs" },
+    { k:"proof",    l:"Proof" },
+    { k:"craft",    l:"Craft" },
+    { k:"teaching", l:"Teaching" },
+    { k:"inbox",    l:"Inbox" },
+    { k:"content",  l:"Content" }
   ];
 
   const counts = {
-    all:     items.length,
-    belief:  byF("belief").length,
-    proof:   byF("proof").length,
-    craft:   byF("craft").length,
-    inbox:   inboxItems.length,
-    content: contentItems.length
+    all:      items.length,
+    belief:   byF("belief").length,
+    proof:    byF("proof").length,
+    craft:    byF("craft").length,
+    teaching: byF("teaching").length,
+    inbox:    inboxItems.length,
+    content:  contentItems.length
   };
 
   document.getElementById("snav").innerHTML = navItems.map(t =>
@@ -379,7 +383,7 @@ function rContent() {
     title = "All Items";
     sub   = `${f.length} items`;
   } else {
-    title = { belief:"Beliefs", proof:"Proof", craft:"Craft" }[S.view] || S.view;
+    title = { belief:"Beliefs", proof:"Proof", craft:"Craft", teaching:"Teaching" }[S.view] || S.view;
     sub   = `${f.length} items`;
   }
   if (S.search) sub = `${f.length} results for "${S.search}"`;

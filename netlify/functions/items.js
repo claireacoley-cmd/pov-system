@@ -14,7 +14,7 @@ const HEADERS = {
   "X-GitHub-Api-Version": "2022-11-28"
 };
 
-const FOLDERS = { belief: "beliefs", proof: "proof", craft: "craft" };
+const FOLDERS = { belief: "beliefs", proof: "proof", craft: "craft", teaching: "teaching" };
 
 // ── FRONTMATTER ──────────────────────────────────────────────
 
@@ -215,15 +215,16 @@ exports.handler = async (event) => {
 
     // ── GET: list all items ──
     if (method === "GET") {
-      const [beliefs, proof, craft] = await Promise.all([
+      const [beliefs, proof, craft, teaching] = await Promise.all([
         listFolder("beliefs"),
         listFolder("proof"),
-        listFolder("craft")
+        listFolder("craft"),
+        listFolder("teaching")
       ]);
       return {
         statusCode: 200,
         headers: { ...cors, "Content-Type": "application/json" },
-        body: JSON.stringify([...beliefs, ...proof, ...craft])
+        body: JSON.stringify([...beliefs, ...proof, ...craft, ...teaching])
       };
     }
 
