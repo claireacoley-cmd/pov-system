@@ -34,6 +34,7 @@ let contentItems = [];
 let loaded  = false;
 
 let cap = { funcs:[], doms:[], beliefs:[], srcType:null, imageData:null, suggested:{funcs:[],doms:[],beliefs:{}} };
+let capStatus = "exploring";
 let think = { source:"Own thinking" };
 let debounceTimer = null;
 
@@ -549,16 +550,18 @@ async function confirmDeleteItem(id, type) {
 }
 
 // ─── CAPTURE MODAL ───
-function openCapture() {
+function openCapture(prefill) {
   cap = { funcs:[], doms:[], beliefs:[], srcType:null, imageData:null, suggested:{funcs:[],doms:[],beliefs:{}} };
-  document.getElementById("cap-title").value    = "";
-  document.getElementById("cap-notes").value    = "";
-  document.getElementById("cap-why").value      = "";
+  capStatus = "exploring";
+  document.getElementById("cap-title").value    = (prefill && prefill.title)    || "";
+  document.getElementById("cap-notes").value    = (prefill && prefill.notes)    || "";
+  document.getElementById("cap-why").value      = (prefill && prefill.why)      || "";
   document.getElementById("cap-url").value      = "";
   document.getElementById("cap-preview").style.display = "none";
   document.getElementById("dropzone").style.display    = "block";
   document.getElementById("file-input").value   = "";
   document.getElementById("sug-banner").classList.add("hidden");
+  if (prefill && prefill.funcs) cap.funcs = prefill.funcs;
   renderCapAll();
   document.getElementById("cap-overlay").classList.add("open");
 }
@@ -584,6 +587,14 @@ function renderCapFuncs() {
     cap.funcs.includes("proof") ? "block" : "none";
   document.getElementById("cap-beliefs-section").style.display =
     (cap.funcs.includes("proof") || cap.funcs.includes("craft")) ? "block" : "none";
+  const statusSec = document.getElementById("cap-status-section");
+  if (statusSec) {
+    statusSec.style.display = cap.funcs.includes("belief") ? "block" : "none";
+    if (cap.funcs.includes("belief")) {
+      document.querySelectorAll("#cap-status-chips .cap-chip").forEach(c =>
+        c.classList.toggle("selected", c.dataset.s === capStatus));
+    }
+  }
 }
 
 function renderCapSrcType() {
@@ -634,6 +645,12 @@ function toggleCapBelief(id) {
 function pickSrc(el) {
   cap.srcType = cap.srcType === el.dataset.s ? null : el.dataset.s;
   renderCapSrcType();
+}
+
+function pickStatus(el) {
+  document.querySelectorAll("#cap-status-chips .cap-chip").forEach(c => c.classList.remove("selected"));
+  el.classList.add("selected");
+  capStatus = el.dataset.s;
 }
 
 async function addNewBelief() {
@@ -712,7 +729,7 @@ async function saveCapture() {
   if (cap.srcType)   newItem.sourceType = cap.srcType;
 
   if (cap.funcs.includes("belief")) {
-    newItem.status    = "exploring";
+    newItem.status    = capStatus || "exploring";
     newItem.linkedIds = [];
   }
 
@@ -754,6 +771,7 @@ function editItem(id) {
     suggested: { funcs:[], doms:[], beliefs:{} },
     editing:   id
   };
+  capStatus = item.status || "exploring";
 
   document.getElementById("cap-title").value = item.title || "";
   document.getElementById("cap-notes").value = item.body  || "";
@@ -805,6 +823,23 @@ function removeImage() {
   document.getElementById("cap-preview").style.display = "none";
   dz.style.display = "block";
   fi.value = "";
+}
+
+// ─── CONVERSATION HELPERS ───
+function extractBeliefFromConv(conversation) {
+  // Pull last bold statement from Claude messages — that's usually the refined belief
+  const claudeMsgs = (conversation || []).filter(m => m.role === "assistant").reverse();
+  for (const msg of claudeMsgs) {
+    const match = msg.content.match(/\*\*([^*]{20,})\*\*/);
+    if (match) return match[1];
+  }
+  return "";
+}
+
+function convToNotes(conversation) {
+  return (conversation || []).map(m =>
+    `${m.role === "user" ? "You" : "Claude"}: ${m.content}`
+  ).join("\n\n");
 }
 
 // ─── THINK MODAL ───
@@ -906,6 +941,32 @@ async function saveThinkWithConv() {
   await _saveThinkItem(title, raw, thinkConversation);
 }
 
+function fileThinkAsBelief() {
+  const raw = document.getElementById("think-dump").value.trim() || (thinkConversation[0]||{}).content || "";
+  const thinkTitle = document.getElementById("think-title").value.trim();
+  const extracted  = extractBeliefFromConv(thinkConversation);
+  closeThink();
+  openCapture({
+    funcs: ["belief"],
+    title: extracted || thinkTitle || "",
+    notes: convToNotes(thinkConversation),
+    why:   raw.slice(0, 200)
+  });
+}
+
+function promoteInboxItem(id) {
+  const item = inboxItems.find(i => i.id === id);
+  if (!item) return;
+  closePanel();
+  const extracted = extractBeliefFromConv(item.conversation || []);
+  openCapture({
+    funcs: ["belief"],
+    title: extracted || item.title || "",
+    notes: convToNotes(item.conversation || []),
+    why:   (item.raw || "").slice(0, 200)
+  });
+}
+
 async function _saveThinkItem(title, raw, conversation) {
   if (!raw) { showToast("Nothing to save"); return; }
   const id = genId("in");
@@ -997,6 +1058,7 @@ function renderInboxPanel(id) {
       </div>
 
       <div class="panel-actions">
+        <button class="panel-action-btn primary" onclick="promoteInboxItem('${id}')">File as Belief →</button>
         <button class="panel-action-btn" onclick="markInboxProcessed('${id}')">Mark Processed</button>
         <button class="panel-action-btn danger" onclick="confirmDeleteInbox('${id}')">Delete</button>
       </div>

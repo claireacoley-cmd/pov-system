@@ -111,6 +111,15 @@
         <div class="cap-chips" id="cap-funcs"></div>
       </div>
 
+      <div class="cap-section" id="cap-status-section" style="display:none">
+        <label>Status</label>
+        <div class="cap-chips" id="cap-status-chips">
+          <button class="cap-chip selected" onclick="pickStatus(this)" data-s="exploring">Exploring</button>
+          <button class="cap-chip" onclick="pickStatus(this)" data-s="developing">Developing</button>
+          <button class="cap-chip" onclick="pickStatus(this)" data-s="conviction">Conviction</button>
+        </div>
+      </div>
+
       <div class="cap-section" id="src-type-section" style="display:none">
         <label>What kind of proof?</label>
         <div class="cap-src-types" id="cap-src-types">
@@ -221,7 +230,8 @@
       </div>
       <div class="cap-actions">
         <button class="cap-btn" onclick="closeThink()">Discard</button>
-        <button class="cap-btn primary" onclick="saveThinkWithConv()">Save to Inbox</button>
+        <button class="cap-btn" onclick="saveThinkWithConv()">Save to Inbox</button>
+        <button class="cap-btn primary" onclick="fileThinkAsBelief()">File as Belief →</button>
       </div>
     </div>
 
