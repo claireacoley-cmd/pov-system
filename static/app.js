@@ -258,7 +258,7 @@ function rDash() {
       <div class="dash-hero-overlay"></div>
       <div class="dash-hero-flash"></div>
       <div class="dash-hero-title">
-        <h2>Build a POV worth storing</h2>
+        <h2>Build a POV worth sharing</h2>
         <p>Beliefs · Proof · Craft</p>
       </div>
     </div>
@@ -1598,12 +1598,20 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove("show"), 2500);
 }
 
+// ─── WHY / HOW MODALS ───
+function openWhy() { document.getElementById("why-overlay").classList.add("open"); }
+function closeWhy() { document.getElementById("why-overlay").classList.remove("open"); }
+function openHow()  { document.getElementById("how-overlay").classList.add("open"); }
+function closeHow() { document.getElementById("how-overlay").classList.remove("open"); }
+
 // ─── KEYBOARD ───
 document.addEventListener("keydown", e => {
   if (e.key === "Escape") {
     closePanel();
     closeCapture();
     closeThink();
+    closeWhy();
+    closeHow();
     document.getElementById("fab-wrap").classList.remove("open");
   }
 });
@@ -1617,6 +1625,12 @@ document.getElementById("cap-overlay").addEventListener("click", e => {
 });
 document.getElementById("think-overlay").addEventListener("click", e => {
   if (e.target === e.currentTarget) closeThink();
+});
+document.getElementById("why-overlay").addEventListener("click", e => {
+  if (e.target === e.currentTarget) closeWhy();
+});
+document.getElementById("how-overlay").addEventListener("click", e => {
+  if (e.target === e.currentTarget) closeHow();
 });
 
 // ─── UTILS ───

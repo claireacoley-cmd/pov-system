@@ -28,6 +28,10 @@
     </div>
     <div class="sidebar-nav" id="snav"></div>
     <div class="sidebar-list" id="slist"></div>
+    <div class="sidebar-footer">
+      <button class="sf-btn" onclick="openWhy()">Why this exists</button>
+      <button class="sf-btn" onclick="openHow()">How it works</button>
+    </div>
   </div>
 
   <!-- ── MAIN ── -->
@@ -283,6 +287,85 @@
 
 <!-- ── TOAST ── -->
 <div class="toast" id="toast"></div>
+
+<!-- ── WHY MODAL ── -->
+<div class="info-overlay" id="why-overlay">
+  <div class="info-panel">
+    <button class="info-close" onclick="closeWhy()">×</button>
+    <div class="info-scroll">
+      <div class="info-essay">
+        <div class="info-kicker">Why this exists</div>
+        <p>I had five tools. None of them talked to each other.</p>
+        <p>Notion held the thinking. Eden.so was for visual inspiration. A course folder had frameworks I'd collected over the years. Drive had everything else. Claude conversations had whatever was happening that week.</p>
+        <p>Nothing was lost. Everything was unfindable.</p>
+        <p>The problem wasn't storage — it was retrieval by intent. I couldn't find "the thing that proves my belief about differentiation." I could find a folder. I could find a date. I couldn't find a function.</p>
+        <p>The breakthrough came from asking a different question. Instead of "what is this?" — <em>why did I save it?</em> Is it something I believe? Something that proves that belief? Something that shows me how to express it?</p>
+        <p>A personal story and a brand case study can both be evidence for the same belief. Organised by topic, they'd be in different places. Organised by function, they're together. Ready when you need them.</p>
+        <p>The second thing I needed: somewhere for ideas that arrive half-formed. Most don't show up ready to classify. They arrive as "there's something in this, I don't know what yet." The Thinking inbox is where that gets resolved — conversation-first, filing second.</p>
+        <p>I've spent a decade translating complexity into something other people can act on — through fourteen acquisitions, brand restructures, team builds from six to forty-four. This is the same work, done for myself first.</p>
+        <p class="info-closer">It's not a bookmark tool. It's not a notes app. It's thinking infrastructure — one that compounds over time and tells you what you actually believe.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── HOW MODAL ── -->
+<div class="info-overlay" id="how-overlay">
+  <div class="info-panel">
+    <button class="info-close" onclick="closeHow()">×</button>
+    <div class="info-scroll">
+      <div class="info-essay">
+        <div class="info-kicker">How it works</div>
+
+        <div class="info-section">
+          <div class="info-section-label">Three types of material</div>
+          <div class="info-type-row">
+            <span class="info-type-name">Belief</span>
+            <span class="info-type-desc">Your positions — what you think is true and why. Status moves from Exploring → Developing → Conviction. The spine everything else hangs from.</span>
+          </div>
+          <div class="info-type-row">
+            <span class="info-type-name">Proof</span>
+            <span class="info-type-desc">Evidence. Stories, examples, patterns, data, perspectives. Six source types so you can see where the evidence is thin.</span>
+          </div>
+          <div class="info-type-row">
+            <span class="info-type-name">Craft</span>
+            <span class="info-type-desc">How to express it. Format, visual, tone. Things you've noticed about how others deliver ideas well.</span>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <div class="info-section-label">Two ways in</div>
+          <div class="info-flow">
+            <div class="info-flow-path">
+              <div class="info-flow-trigger">Think button</div>
+              <div class="info-flow-arrow">↓</div>
+              <div class="info-flow-desc">For ideas that arrive messy. Dump what you've got — raw, unfiltered. Claude identifies the threads, spars with you until it resolves, then proposes a filing brief. You approve. Items land in the right places.</div>
+            </div>
+            <div class="info-flow-divider">or</div>
+            <div class="info-flow-path">
+              <div class="info-flow-trigger">+ button</div>
+              <div class="info-flow-arrow">↓</div>
+              <div class="info-flow-desc">For material ready to classify. Pick the function, fill in why you saved it. A suggestion engine proposes tags as you type.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <div class="info-section-label">Navigating</div>
+          <p>The <strong>Inbox</strong> holds things in progress — sparring sessions, half-filed ideas. Open one to continue the conversation or send it through.</p>
+          <p>Click any <strong>belief in the sidebar</strong> to pull up everything connected to it: proof that supports it, craft that would help you express it.</p>
+          <p><strong>Filters</strong> at the top cut by function, domain, or proof source type. Search reaches inside notes and why-saved fields.</p>
+        </div>
+
+        <div class="info-flow-full">
+          <div class="info-flow-full-inner">Think → Inbox → Spar → File as Belief / Proof / Craft</div>
+          <div class="info-flow-full-inner">Capture → Direct filing → Tagged to beliefs</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
 
 <script src="static/app.js"></script>
 </body>
