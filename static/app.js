@@ -1332,7 +1332,8 @@ function focusBelief(id) {
 }
 
 function toggleFunc(f) {
-  S.funcF = S.funcF === f ? null : f;
+  S.funcF  = S.funcF === f ? null : f;
+  S.belief = null;
   if (S.funcF !== "proof") S.srcF = null;
   render();
 }
