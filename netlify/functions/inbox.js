@@ -67,6 +67,10 @@ function parseFrontmatter(content) {
 
 function inboxToMarkdown(item) {
   const path = `inbox/${item.id}.md`;
+
+  // Store conversation as base64 to avoid any markdown/comment escaping issues
+  const convB64 = Buffer.from(JSON.stringify(item.conversation || []), "utf8").toString("base64");
+
   const meta = {
     type: "inbox",
     id: item.id,
@@ -75,22 +79,18 @@ function inboxToMarkdown(item) {
     source: item.source || "manual",
     created: item.created || new Date().toISOString().slice(0, 10),
     outputs: item.outputs || [],
-    content_ideas: item.contentIdeas || []
+    content_ideas: item.contentIdeas || [],
+    conversation_b64: convB64
   };
 
-  // Conversation stored as JSON in frontmatter
-  const conversationJson = JSON.stringify(item.conversation || []);
+  if (item.agreedOutput) meta.agreed_output = item.agreedOutput;
 
   const body = [
     toFrontmatter(meta),
     "",
     "## Raw Dump",
     "",
-    item.raw || "",
-    "",
-    "## Conversation",
-    "",
-    `<!-- conversation-json: ${conversationJson} -->`
+    item.raw || ""
   ].join("\n");
 
   return { path, body };
@@ -101,13 +101,20 @@ function markdownToInbox(path, content) {
 
   // Extract raw dump
   const rawMatch = body.match(/## Raw Dump\n\n([\s\S]*?)(?=\n## |$)/);
-  const raw = rawMatch ? rawMatch[1].trim() : "";
+  const raw = rawMatch ? rawMatch[1].trim() : body.replace(/^## Raw Dump\n\n/, "").trim();
 
-  // Extract conversation JSON
-  const convMatch = body.match(/<!-- conversation-json: ([\s\S]*?) -->/);
+  // Decode conversation — supports new base64 format and old HTML comment format
   let conversation = [];
-  if (convMatch) {
-    try { conversation = JSON.parse(convMatch[1]); } catch (e) { conversation = []; }
+  if (meta.conversation_b64) {
+    try {
+      conversation = JSON.parse(Buffer.from(meta.conversation_b64, "base64").toString("utf8"));
+    } catch (e) { conversation = []; }
+  } else {
+    // Legacy: HTML comment format
+    const convMatch = content.match(/<!-- conversation-json: ([\s\S]*?) -->/);
+    if (convMatch) {
+      try { conversation = JSON.parse(convMatch[1]); } catch (e) { conversation = []; }
+    }
   }
 
   return {
@@ -118,6 +125,7 @@ function markdownToInbox(path, content) {
     created: meta.created || null,
     outputs: meta.outputs || [],
     contentIdeas: meta.content_ideas || [],
+    agreedOutput: meta.agreed_output || null,
     raw,
     conversation
   };
