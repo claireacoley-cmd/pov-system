@@ -3,9 +3,10 @@
 // ═══════════════════════════════════════
 
 // ─── CONSTANTS ───
-const DOMAINS = ["Strategy","Brand","Content","Experience","Culture","Business","Teaching"];
-const FUNCS   = ["belief","proof","craft","teaching"];
-const SRC_TYPES = ["lived","their-story","example","perspective","pattern","data","models"];
+const DOMAINS      = ["Strategy","Brand","Content","Experience","Culture","Business","Teaching"];
+const FUNCS        = ["belief","proof","craft","teaching"];
+const FILTER_FUNCS = ["belief","proof","craft"];
+const SRC_TYPES    = ["lived","their-story","example","perspective","pattern","data","models"];
 
 const domainKeywords = {
   Strategy:   ["strategy","positioning","competitive","differentiation","market","niche","approach","plan","distinct"],
@@ -146,7 +147,7 @@ function filt() {
       f = items.filter(i => linked_ids.has(i.id) && i.id !== S.belief);
     }
   }
-  if (S.view !== "all" && !S.belief) f = f.filter(i => i.functions.includes(S.view));
+  if (S.view !== "all" && !S.belief && !S.funcF) f = f.filter(i => i.functions.includes(S.view));
   if (S.funcF) f = f.filter(i => i.functions.includes(S.funcF));
   if (S.srcF)  f = f.filter(i => i.sourceType === S.srcF);
   if (S.domF)  f = f.filter(i => (i.domains||[]).includes(S.domF));
@@ -340,7 +341,7 @@ function rFilters() {
     "data":        "Numbers, research, or stats"
   };
 
-  let ffHtml = FUNCS.map(f =>
+  let ffHtml = FILTER_FUNCS.map(f =>
     `<button class="ft ${S.funcF===f?'active':''}" onclick="toggleFunc('${f}')">${f}</button>`
   ).join("");
 
