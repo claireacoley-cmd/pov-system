@@ -705,6 +705,8 @@ async function saveCapture() {
     if (url)             item.source     = url;
     if (cap.imageData)   item.image      = cap.imageData;
     if (cap.srcType)     item.sourceType = cap.srcType;
+    if (cap.funcs.includes("proof")) item.supportsBelief = [...cap.beliefs];
+    if (cap.funcs.includes("craft")) item.relatedBelief  = [...cap.beliefs];
     try {
       await updateItem(item);
       closeCapture();
@@ -777,7 +779,7 @@ function editItem(id) {
   cap = {
     funcs:     [...(item.functions||[])],
     doms:      [...(item.domains||[])],
-    beliefs:   [...(item.supportsBelief||item.relatedBelief||[])],
+    beliefs:   [...new Set([...(item.supportsBelief||[]), ...(item.relatedBelief||[])])],
     srcType:   item.sourceType || null,
     imageData: item.image || null,
     suggested: { funcs:[], doms:[], beliefs:{} },
@@ -1162,12 +1164,12 @@ function renderThinkConv() {
 
   // Show "Review & File →" and demote "File as Belief" when brief is ready
   const filingBtn = document.getElementById("think-filing-btn");
-  const beliefBtn = document.getElementById("think-file-belief-btn");
+  const fileBtn   = document.getElementById("think-file-btn");
   if (filingBtn) {
     filingBtn.style.display = lastFilingBrief ? "inline-block" : "none";
     filingBtn.classList.toggle("primary", !!lastFilingBrief);
   }
-  if (beliefBtn) beliefBtn.classList.toggle("primary", !lastFilingBrief);
+  if (fileBtn) fileBtn.classList.toggle("primary", !lastFilingBrief);
 
   const scroll = document.getElementById("think-conv-scroll");
   if (scroll) scroll.scrollTop = scroll.scrollHeight;
@@ -1186,16 +1188,14 @@ async function saveThinkWithConv() {
   await _saveThinkItem(title, raw, thinkConversation);
 }
 
-function fileThinkAsBelief() {
+function fileThinkAs() {
   const raw = document.getElementById("think-dump").value.trim() || (thinkConversation[0]||{}).content || "";
   const thinkTitle = document.getElementById("think-title").value.trim();
-  const extracted  = extractBeliefFromConv(thinkConversation);
   closeThink();
   openCapture({
-    funcs: ["belief"],
-    title: thinkTitle || extracted.slice(0, 80) || "",
-    notes: extracted || raw,   // agreed output as the belief body, not the full transcript
-    why:   raw.slice(0, 300)
+    title: thinkTitle || "",
+    notes: raw,
+    why:   ""
   });
 }
 
