@@ -186,7 +186,7 @@ async function listFolder(folder) {
   if (!data || !Array.isArray(data)) return [];
 
   const items = [];
-  for (const file of data.filter(f => f.name.endsWith(".md"))) {
+  for (const file of data.filter(f => f.name.endsWith(".md") && !f.name.startsWith("."))) {
     const fileData = await ghGet(file.path);
     if (fileData && fileData.content) {
       const content = Buffer.from(fileData.content, "base64").toString("utf8");
