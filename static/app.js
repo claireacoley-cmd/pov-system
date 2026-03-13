@@ -5,7 +5,7 @@
 // ─── CONSTANTS ───
 const DOMAINS = ["Strategy","Brand","Content","Experience","Culture","Business","Teaching"];
 const FUNCS   = ["belief","proof","craft","teaching"];
-const SRC_TYPES = ["lived","their-story","example","perspective","pattern","data"];
+const SRC_TYPES = ["lived","their-story","example","perspective","pattern","data","models"];
 
 const domainKeywords = {
   Strategy:   ["strategy","positioning","competitive","differentiation","market","niche","approach","plan","distinct"],
@@ -22,7 +22,8 @@ const srcLabels = {
   "example":    "Example",
   "perspective":"Perspective",
   "pattern":    "Pattern",
-  "data":       "Data"
+  "data":       "Data",
+  "models":     "Models"
 };
 
 // ─── STATE ───
