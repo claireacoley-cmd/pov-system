@@ -820,14 +820,58 @@ function handleImageUrl(val) {
 
 function handleFile(file) {
   if (!file.type.startsWith("image/")) return;
-  const r = new FileReader();
-  r.onload = e => {
-    cap.imageData = e.target.result;
-    document.getElementById("preview-img").src = e.target.result;
-    document.getElementById("cap-img-url").value = "";
+
+  // Show preview immediately while uploading
+  const reader = new FileReader();
+  reader.onload = async e => {
+    const original = e.target.result;
+    document.getElementById("preview-img").src = original;
     document.getElementById("cap-preview").style.display = "inline-block";
+    document.getElementById("cap-img-url").value = "Uploading...";
+    document.getElementById("cap-img-url").disabled = true;
+
+    // Compress via canvas before uploading
+    const compressed = await compressImage(original, 1200, 0.8);
+
+    try {
+      const res = await fetch("/api/upload-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageData: compressed, filename: file.name })
+      });
+      const data = await res.json();
+      if (data.url) {
+        cap.imageData = data.url;
+        document.getElementById("preview-img").src = data.url;
+        document.getElementById("cap-img-url").value = data.url;
+      } else {
+        throw new Error(data.error || "Upload failed");
+      }
+    } catch (err) {
+      console.error("Image upload failed:", err);
+      // Fall back to base64 if upload fails
+      cap.imageData = original;
+      document.getElementById("cap-img-url").value = "(upload failed — using local)";
+    } finally {
+      document.getElementById("cap-img-url").disabled = false;
+    }
   };
-  r.readAsDataURL(file);
+  reader.readAsDataURL(file);
+}
+
+function compressImage(dataUrl, maxWidth, quality) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxWidth / img.width);
+      const canvas = document.createElement("canvas");
+      canvas.width  = Math.round(img.width  * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL("image/jpeg", quality));
+    };
+    img.src = dataUrl;
+  });
 }
 
 function removeImage() {
