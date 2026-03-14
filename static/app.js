@@ -261,7 +261,6 @@ function rDash() {
       <div class="dash-hero-flash"></div>
       <div class="dash-hero-title">
         <h2>Build a POV worth sharing</h2>
-        <p>Your ideas keep arriving. Your point of view never does.</p>
       </div>
     </div>
 `;
@@ -1089,7 +1088,6 @@ function openThink() {
   document.getElementById("think-title").value = "";
   document.getElementById("think-dump").value  = "";
   document.getElementById("think-conv-thread").innerHTML = "";
-  document.getElementById("think-hdr-sub").textContent = "Dump raw thinking. Don't filter.";
   document.querySelectorAll(".think-type-pill").forEach(p => p.className = "think-type-pill");
   document.querySelectorAll(".think-type-chip").forEach(c => c.classList.toggle("selected", c.dataset.t === ""));
   think.type = "";
@@ -1122,7 +1120,6 @@ async function startThinkSpar() {
   // Switch to spar phase
   document.getElementById("think-dump-phase").style.display = "none";
   document.getElementById("think-spar-phase").style.display = "flex";
-  document.getElementById("think-hdr-sub").textContent = "Sparring with Claude";
 
   // Send raw dump as first message
   thinkConversation = [{ role:"user", content: raw }];

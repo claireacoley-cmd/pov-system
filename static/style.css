@@ -1817,6 +1817,7 @@ textarea.cap-input { min-height: 60px; }
   }
   .search-wrap input {
     width: 100%;
+    padding: 10px 24px 10px 0;
   }
 
   /* Pad main content so sticky footer doesn't overlap */
