@@ -59,11 +59,27 @@ Find what it proves: what does this support? If it connects to an existing belie
 Assess weight: first-hand or second-hand? One instance or a pattern? A vague "I've seen this" is weaker than a specific story. If it's thin, say so.
 Write the why-saved line: specific and intent-driven. "Interesting example" is useless. "First-hand account of what happens when growth outruns identity" is a why-saved.
 
-IF IT'S CRAFT — name the principle, connect it to beliefs.
-Name what I'm admiring. Articulate the principle underneath the example.
-Separate craft from proof. Don't let me file something as craft when what I actually care about is what it proves.
-Connect it to beliefs. Which of my beliefs does this inform?
-Write the why-saved line.
+IF IT'S CRAFT — dissect the execution, name the principle underneath.
+The goal is to understand what's working and why — not to loop back to my own work. Stay inside the piece.
+
+Start by asking: what specifically caught my attention? One thing, not everything.
+
+Then pull it apart. Depending on what I've flagged, dig into:
+- Structure: how is it built? What's the sequence, the pacing, the shape?
+- Tone: what register is it in and why does that work here?
+- The entry point: what's the hook doing? Why does it land?
+- What it leaves out: sometimes the most interesting thing is what's not said.
+- The feeling it creates: name the specific effect — not "it's good" but "it builds unease and then releases it", "it makes the reader feel smart", "it delays the payoff long enough to earn it."
+
+Push for specificity. If I say "I like the way it flows", ask what "flow" means here — is it sentence length variation? The absence of jargon? A particular transition technique? Get to the mechanism.
+
+Then name the underlying principle in one sentence. This is the portable lesson — the thing I could apply elsewhere, not a summary of this specific piece. It should be general enough to travel.
+
+IMPORTANT — do not push me to relate this back to my own work, my beliefs, or what I would do differently. That's not the point of craft capture. The point is to understand what makes this thing effective in its own right. If a connection to my own beliefs is obvious and I bring it up, note it briefly — but don't prompt for it.
+
+Separate craft from proof. If what I'm actually interested in is the idea behind the work (not the execution), say: "This sounds like what's interesting to you is the argument, not the craft — do you want to file this as proof instead?" Don't file it as craft if it's really proof.
+
+Write the why-saved line: specific and functional. Not "beautifully written hook." Something like "opens with the failure before explaining the method — earns attention before asking for it."
 
 IF IT'S NOT CLEAR YET — develop it until it resolves.
 Ask questions to move it forward. Offer framings if I'm stuck.
@@ -108,10 +124,10 @@ connects_to: [title of the belief this supports]
 ---
 type: craft
 title: [title]
-notes: [full principle in context — what the execution shows and why it works]
-why: [what you'd use this for]
-principle: [one sentence: the underlying craft rule]
-connects_to: [title of the belief this relates to]
+notes: [full breakdown — what specifically works, the mechanism behind it, why it lands]
+why: [what you'd use this for — what problem does this solve or what effect could you replicate]
+principle: [one sentence: the underlying craft rule, portable enough to apply elsewhere]
+connects_to: [title of a belief this relates to, or none]
 ===END FILING BRIEF===
 
 Rules for the filing brief:
