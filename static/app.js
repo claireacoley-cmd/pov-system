@@ -261,7 +261,7 @@ function rDash() {
       <div class="dash-hero-flash"></div>
       <div class="dash-hero-title">
         <h2>Build a POV worth sharing</h2>
-        <p>Beliefs · Proof · Craft</p>
+        <p>Your ideas keep arriving. Your point of view never does.</p>
       </div>
     </div>
 `;
