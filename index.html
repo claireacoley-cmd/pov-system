@@ -78,11 +78,11 @@
       </div>
 
       <div class="cap-section">
-        <label>Image</label>
-        <div class="cap-dropzone" id="dropzone">
-          <input type="file" accept="image/*" id="file-input">
-          <p>Drop image or click to browse</p>
-          <span class="hint">Screenshots, photos, visual refs</span>
+        <label>Image URL</label>
+        <div class="cap-img-url-wrap">
+          <input type="url" class="cap-input" id="cap-img-url" placeholder="https://..." oninput="handleImageUrl(this.value)">
+          <button class="cap-img-upload-toggle" onclick="document.getElementById('file-input').click()">or upload file</button>
+          <input type="file" accept="image/*" id="file-input" style="display:none">
         </div>
         <div class="cap-preview" id="cap-preview" style="display:none">
           <img id="preview-img" alt="">

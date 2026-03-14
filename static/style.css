@@ -896,18 +896,29 @@ textarea.cap-input { min-height: 60px; }
 .sug-icon { font-size: 10px; flex-shrink: 0; }
 
 /* Dropzone */
-.cap-dropzone {
-  position: relative;
-  border: 1px dashed var(--rule-dk);
-  padding: 20px;
-  text-align: center;
-  cursor: pointer;
-  transition: border-color 0.1s;
+.cap-img-url-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
-.cap-dropzone:hover { border-color: var(--ink); }
-.cap-dropzone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-.cap-dropzone p { font-size: 11px; color: var(--dim); font-weight: 300; }
-.cap-dropzone .hint { font-size: 9px; color: var(--faint); margin-top: 3px; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; }
+.cap-img-url-wrap .cap-input {
+  flex: 1;
+  margin-bottom: 0;
+}
+.cap-img-upload-toggle {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--faint);
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  white-space: nowrap;
+}
+.cap-img-upload-toggle:hover { color: var(--ink); }
 
 .cap-preview { position: relative; display: inline-block; }
 .cap-preview img { max-width: 100%; border: 1px solid var(--rule); display: block; }

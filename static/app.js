@@ -560,7 +560,7 @@ function openCapture(prefill) {
   document.getElementById("cap-why").value      = (prefill && prefill.why)      || "";
   document.getElementById("cap-url").value      = "";
   document.getElementById("cap-preview").style.display = "none";
-  document.getElementById("dropzone").style.display    = "block";
+  document.getElementById("cap-img-url").value  = "";
   document.getElementById("file-input").value   = "";
   document.getElementById("sug-banner").classList.add("hidden");
   if (prefill && prefill.funcs) cap.funcs = prefill.funcs;
@@ -792,10 +792,11 @@ function editItem(id) {
   if (item.image) {
     document.getElementById("preview-img").src = item.image;
     document.getElementById("cap-preview").style.display = "inline-block";
-    document.getElementById("dropzone").style.display    = "none";
+    document.getElementById("cap-img-url").value = item.image.startsWith("http") ? item.image : "";
+    cap.imageData = item.image;
   } else {
     document.getElementById("cap-preview").style.display = "none";
-    document.getElementById("dropzone").style.display    = "block";
+    document.getElementById("cap-img-url").value = "";
   }
 
   document.getElementById("sug-banner").classList.add("hidden");
@@ -805,17 +806,17 @@ function editItem(id) {
 
 
 // ─── IMAGE HANDLING ───
-const dz = document.getElementById("dropzone");
 const fi = document.getElementById("file-input");
 
-dz.addEventListener("dragover",  e => { e.preventDefault(); dz.classList.add("dragover"); });
-dz.addEventListener("dragleave", () => dz.classList.remove("dragover"));
-dz.addEventListener("drop",      e => {
-  e.preventDefault();
-  dz.classList.remove("dragover");
-  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
-});
 fi.addEventListener("change", e => { if (e.target.files.length) handleFile(e.target.files[0]); });
+
+function handleImageUrl(val) {
+  const url = val.trim();
+  if (!url) { removeImage(); return; }
+  cap.imageData = url;
+  document.getElementById("preview-img").src = url;
+  document.getElementById("cap-preview").style.display = "inline-block";
+}
 
 function handleFile(file) {
   if (!file.type.startsWith("image/")) return;
@@ -823,8 +824,8 @@ function handleFile(file) {
   r.onload = e => {
     cap.imageData = e.target.result;
     document.getElementById("preview-img").src = e.target.result;
+    document.getElementById("cap-img-url").value = "";
     document.getElementById("cap-preview").style.display = "inline-block";
-    dz.style.display = "none";
   };
   r.readAsDataURL(file);
 }
@@ -832,7 +833,7 @@ function handleFile(file) {
 function removeImage() {
   cap.imageData = null;
   document.getElementById("cap-preview").style.display = "none";
-  dz.style.display = "block";
+  document.getElementById("cap-img-url").value = "";
   fi.value = "";
 }
 
