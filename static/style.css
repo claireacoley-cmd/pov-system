@@ -42,9 +42,31 @@ input, textarea { font-family: 'Montserrat', sans-serif; }
 }
 
 .sidebar-hdr {
-  padding: 28px 20px 20px;
+  padding: 28px 20px 16px;
   border-bottom: 1px solid var(--rule);
 }
+.sidebar-hdr-links {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 14px;
+}
+.hdr-link-btn {
+  background: #f5e642;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-family: inherit;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #0d0d0d;
+  cursor: pointer;
+  text-align: left;
+  transition: opacity 0.15s;
+}
+.hdr-link-btn:hover { opacity: 0.75; }
 
 .sidebar-logo {
   display: block;
