@@ -283,7 +283,6 @@ function rSidebar() {
     { k:"belief",   l:"Beliefs" },
     { k:"proof",    l:"Proof" },
     { k:"craft",    l:"Craft" },
-    { k:"teaching", l:"Teaching" },
     { k:"inbox",    l:"Inbox" },
     { k:"content",  l:"Content" }
   ];
@@ -293,7 +292,6 @@ function rSidebar() {
     belief:   byF("belief").length,
     proof:    byF("proof").length,
     craft:    byF("craft").length,
-    teaching: byF("teaching").length,
     inbox:    inboxItems.length,
     content:  contentItems.length
   };
@@ -387,7 +385,7 @@ function rContent() {
     title = "All Items";
     sub   = `${f.length} items`;
   } else {
-    title = { belief:"Beliefs", proof:"Proof", craft:"Craft", teaching:"Teaching" }[S.view] || S.view;
+    title = { belief:"Beliefs", proof:"Proof", craft:"Craft" }[S.view] || S.view;
     sub   = `${f.length} items`;
   }
   if (S.search) sub = `${f.length} results for "${S.search}"`;
@@ -1092,6 +1090,7 @@ function openThink() {
   document.getElementById("think-dump").value  = "";
   document.getElementById("think-conv-thread").innerHTML = "";
   document.getElementById("think-hdr-sub").textContent = "Dump raw thinking. Don't filter.";
+  document.querySelectorAll(".think-type-pill").forEach(p => p.className = "think-type-pill");
   document.querySelectorAll(".think-source-chip").forEach(c => c.classList.toggle("selected", c.textContent.trim() === "Own thinking"));
   document.getElementById("think-dump-phase").style.display = "flex";
   document.getElementById("think-spar-phase").style.display = "none";
@@ -1155,12 +1154,60 @@ async function callThinkSpar() {
   }
 }
 
+function detectActiveTypes(conversation) {
+  // Scan assistant messages for type confirmation signals
+  const confirmed = new Set();
+  const active = new Set();
+  const allText = conversation
+    .filter(m => m.role === "assistant")
+    .map(m => m.content.toLowerCase())
+    .join(" ");
+
+  // Check for confirmed/filed signals
+  if (/that'?s.{0,30}belief.{0,60}agreed|belief.{0,30}agreed|agreed.{0,30}belief/.test(allText)) confirmed.add("belief");
+  if (/that'?s.{0,30}proof.{0,60}agreed|proof.{0,30}agreed|agreed.{0,30}proof/.test(allText)) confirmed.add("proof");
+  if (/that'?s.{0,30}craft.{0,60}agreed|craft.{0,30}agreed|agreed.{0,30}craft/.test(allText)) confirmed.add("craft");
+
+  // Check for active working signals in recent messages (last 3 assistant turns)
+  const recentMsgs = conversation.filter(m => m.role === "assistant").slice(-3).map(m => m.content.toLowerCase()).join(" ");
+  if (/\bbelief\b/.test(recentMsgs)) active.add("belief");
+  if (/\bproof\b/.test(recentMsgs)) active.add("proof");
+  if (/\bcraft\b/.test(recentMsgs)) active.add("craft");
+
+  // Also check filing brief for what's been resolved
+  if (lastFilingBrief) {
+    lastFilingBrief.forEach(item => { if (item.type) confirmed.add(item.type); });
+  }
+
+  return { active, confirmed };
+}
+
+function updateTypePills(conversation) {
+  const pills = document.querySelectorAll(".think-type-pill");
+  if (!pills.length) return;
+
+  const { active, confirmed } = detectActiveTypes(conversation);
+
+  pills.forEach(pill => {
+    const t = pill.dataset.type;
+    pill.className = "think-type-pill";
+    if (confirmed.has(t)) {
+      pill.classList.add("confirmed");
+    } else if (active.has(t)) {
+      pill.classList.add(`active-${t}`);
+    }
+  });
+}
+
 function renderThinkConv() {
   lastFilingBrief = getFilingBrief(thinkConversation);
   lastFilingSourceInbox = null;
 
   const thread = document.getElementById("think-conv-thread");
   thread.innerHTML = thinkConversation.map(renderConvMsg).join("");
+
+  // Update type indicator pills
+  updateTypePills(thinkConversation);
 
   // Show "Review & File →" and demote "File as Belief" when brief is ready
   const filingBtn = document.getElementById("think-filing-btn");
