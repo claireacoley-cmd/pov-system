@@ -209,6 +209,16 @@
           <textarea class="cap-input" id="think-dump" placeholder="Just dump it. Questions, observations, half-formed ideas. Don't filter." style="min-height:160px"></textarea>
         </div>
         <div class="cap-section">
+          <label>What type is this?</label>
+          <div class="cap-chips">
+            <button class="cap-chip think-type-chip" onclick="pickThinkType(this)" data-t="belief">Belief</button>
+            <button class="cap-chip think-type-chip" onclick="pickThinkType(this)" data-t="proof">Proof</button>
+            <button class="cap-chip think-type-chip" onclick="pickThinkType(this)" data-t="craft">Craft</button>
+            <button class="cap-chip think-type-chip" onclick="pickThinkType(this)" data-t="mixed">Mixed</button>
+            <button class="cap-chip think-type-chip selected" onclick="pickThinkType(this)" data-t="">Not sure</button>
+          </div>
+        </div>
+        <div class="cap-section">
           <label>Where did this come from?</label>
           <div class="cap-chips">
             <button class="cap-chip think-source-chip selected" onclick="pickThinkSource(this)">Own thinking</button>

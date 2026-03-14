@@ -131,7 +131,7 @@ exports.handler = async (event) => {
   if (event.httpMethod !== "POST") return { statusCode: 405, headers: cors, body: "Method not allowed" };
 
   try {
-    const { conversation, raw, beliefs } = JSON.parse(event.body);
+    const { conversation, raw, beliefs, thinkType } = JSON.parse(event.body);
 
     // Build the system prompt with current beliefs injected
     const beliefList = (beliefs || [])
@@ -139,7 +139,13 @@ exports.handler = async (event) => {
       .map(b => `- ${b.title}${b.status ? ` (${b.status})` : ""}`)
       .join("\n");
 
-    const systemWithBeliefs = SYSTEM_PROMPT + (beliefList
+    const typeHint = thinkType && thinkType !== "mixed"
+      ? `\n\nThe user has indicated this material is: ${thinkType.toUpperCase()}. Skip the type identification step — go straight to the ${thinkType} diagnostic path. Confirm briefly ("Got it — treating this as a ${thinkType}. Let's dig in.") then proceed.`
+      : thinkType === "mixed"
+      ? `\n\nThe user has indicated this material is MIXED — it contains more than one type. Start by identifying the separate threads and ask which to work on first.`
+      : "";
+
+    const systemWithBeliefs = SYSTEM_PROMPT + typeHint + (beliefList
       ? `\n\nMy current beliefs (update your understanding of these as we talk):\n${beliefList}`
       : "");
 

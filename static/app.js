@@ -1091,6 +1091,8 @@ function openThink() {
   document.getElementById("think-conv-thread").innerHTML = "";
   document.getElementById("think-hdr-sub").textContent = "Dump raw thinking. Don't filter.";
   document.querySelectorAll(".think-type-pill").forEach(p => p.className = "think-type-pill");
+  document.querySelectorAll(".think-type-chip").forEach(c => c.classList.toggle("selected", c.dataset.t === ""));
+  think.type = "";
   document.querySelectorAll(".think-source-chip").forEach(c => c.classList.toggle("selected", c.textContent.trim() === "Own thinking"));
   document.getElementById("think-dump-phase").style.display = "flex";
   document.getElementById("think-spar-phase").style.display = "none";
@@ -1099,6 +1101,12 @@ function openThink() {
 
 function closeThink() {
   document.getElementById("think-overlay").classList.remove("open");
+}
+
+function pickThinkType(el) {
+  document.querySelectorAll(".think-type-chip").forEach(c => c.classList.remove("selected"));
+  el.classList.add("selected");
+  think.type = el.dataset.t;
 }
 
 function pickThinkSource(el) {
@@ -1140,7 +1148,7 @@ async function callThinkSpar() {
     const res = await fetch("/api/think-chat", {
       method: "POST",
       headers: { "Content-Type":"application/json" },
-      body: JSON.stringify({ conversation: thinkConversation, beliefs: items })
+      body: JSON.stringify({ conversation: thinkConversation, beliefs: items, thinkType: think.type || "" })
     });
     const data = await res.json();
     const reply = data.reply || "Something went wrong — try again.";
