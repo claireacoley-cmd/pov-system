@@ -1672,17 +1672,16 @@ textarea.cap-input { min-height: 60px; }
   position: relative;
 }
 .bm-skin {
-  background: var(--ink);
+  border: 1px solid var(--rule);
   padding-bottom: 14px;
 }
 .bm-muscle {
-  background: #3a3a3a;
+  border: 1px solid var(--rule-dk);
   margin-top: 0;
   padding-bottom: 14px;
 }
 .bm-skeleton {
-  background: var(--paper);
-  border: 1px solid var(--rule);
+  border: 1px solid var(--ink);
   margin-top: 0;
   padding-bottom: 14px;
 }
@@ -1697,33 +1696,21 @@ textarea.cap-input { min-height: 60px; }
   font-weight: 700;
   letter-spacing: 3px;
   text-transform: uppercase;
+  color: var(--faint);
 }
 .bm-layer-type {
   font-size: 11px;
   font-weight: 600;
+  color: var(--ink);
 }
 .bm-layer-desc {
   font-size: 11px;
   font-weight: 300;
   line-height: 1.5;
   margin-bottom: 12px;
+  color: var(--dim);
 }
-.bm-skin .bm-layer-tag,
-.bm-skin .bm-layer-type,
-.bm-skin .bm-layer-desc,
-.bm-skin .bm-icon { color: #a8a8a8; }
-.bm-skin .bm-layer-type { color: #f8f6f2; }
-
-.bm-muscle .bm-layer-tag,
-.bm-muscle .bm-layer-type,
-.bm-muscle .bm-layer-desc,
-.bm-muscle .bm-icon { color: #8a8a8a; }
-.bm-muscle .bm-layer-type { color: #f8f6f2; }
-
-.bm-skeleton .bm-layer-tag { color: var(--faint); }
-.bm-skeleton .bm-layer-type { color: var(--ink); }
-.bm-skeleton .bm-layer-desc { color: var(--dim); }
-.bm-skeleton .bm-icon { color: var(--ink); }
+.bm-icon { color: var(--ink); }
 
 .bm-annotation {
   font-size: 8px;
