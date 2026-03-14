@@ -523,7 +523,6 @@ function openD(id) {
 
   s += `<div class="panel-actions">
     <button class="panel-action-btn" onclick="editItem('${id}')">Edit</button>
-    <button class="panel-action-btn danger" onclick="confirmDeleteItem('${id}','${(item.functions||["proof"])[0]}')">Delete</button>
   </div>`;
 
   s += `</div>`;
