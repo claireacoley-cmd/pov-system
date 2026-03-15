@@ -3,18 +3,20 @@
 // ═══════════════════════════════════════
 
 // ─── CONSTANTS ───
-const DOMAINS      = ["Strategy","Brand","Content","Experience","Culture","Business","Teaching"];
+const DOMAINS      = ["Leadership","Change","Culture","Teaching","Brand","Marketing","Strategy","POV"];
 const FUNCS        = ["belief","proof","craft","teaching"];
 const FILTER_FUNCS = ["belief","proof","craft"];
 const SRC_TYPES    = ["lived","their-story","example","perspective","pattern","data","models"];
 
 const domainKeywords = {
-  Strategy:   ["strategy","positioning","competitive","differentiation","market","niche","approach","plan","distinct"],
-  Brand:      ["brand","voice","identity","visual","tone","logo","design","aesthetic","look"],
-  Content:    ["content","post","write","article","newsletter","carousel","format","hook","headline","copy","social"],
-  Experience: ["experience","space","atmosphere","physical","restaurant","bar","hotel","event","retail","touch"],
-  Culture:    ["culture","taste","reference","influence","inspiration","art","music","film","vintage"],
-  Business:   ["business","model","revenue","pricing","sales","go-to-market","operations","growth","direct","mail"]
+  Leadership: ["leadership","leader","team","people","manage","feedback","hire","fire","performance","review","report","delegate"],
+  Change:     ["change","transformation","integration","acquisition","M&A","restructure","transition","merger","org"],
+  Culture:    ["culture","norms","environment","behaviour","values","trust","psychological","safety","org design"],
+  Teaching:   ["teaching","learning","knowledge","expertise","transfer","proximity","mentor","coach","develop","skill"],
+  Brand:      ["brand","voice","identity","visual","tone","logo","design","aesthetic","look","positioning","stamp"],
+  Marketing:  ["marketing","content","post","write","article","newsletter","format","hook","copy","social","audience","GTM","go-to-market","campaign","conversion"],
+  Strategy:   ["strategy","competitive","differentiation","market","niche","approach","expansion","growth","trade-off","distinct"],
+  POV:        ["POV","point of view","belief","conviction","perspective","opinion","lived","experience","instinct","framework"]
 };
 
 const srcLabels = {
